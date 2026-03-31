@@ -65,6 +65,11 @@ body { background:var(--bg); color:var(--tx); font-family:'Inter',sans-serif; mi
 }
 .theme-toggle:hover { border-color:var(--tx3); color:var(--tx); }
 .sidebar-body { padding:20px; display:flex; flex-direction:column; gap:18px; flex:1; }
+#sidebar { scrollbar-width:thin; scrollbar-color:var(--s3) transparent; }
+#sidebar::-webkit-scrollbar { width:4px; }
+#sidebar::-webkit-scrollbar-track { background:transparent; }
+#sidebar::-webkit-scrollbar-thumb { background:var(--s3); border-radius:4px; }
+#sidebar::-webkit-scrollbar-thumb:hover { background:var(--tx3); }
 .section-label { font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:var(--tx3); font-weight:500; display:block; margin-bottom:4px; }
 .field-group { display:flex; flex-direction:column; gap:8px; }
 label { font-size:12px; color:var(--tx2); display:block; margin-bottom:2px; font-weight:400; }
