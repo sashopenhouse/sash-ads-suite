@@ -363,8 +363,8 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
   <div>
     <span class="section-label">Overlay Mode</span>
     <div class="overlay-mode-toggle">
-      <button class="om-btn active" id="om-light" onclick="setOverlayMode('light')">☀ Light</button>
-      <button class="om-btn" id="om-dark" onclick="setOverlayMode('dark')">◑ Dark</button>
+      <button class="om-btn" id="om-light" onclick="setOverlayMode('light')">☀ Light</button>
+      <button class="om-btn active" id="om-dark" onclick="setOverlayMode('dark')">◑ Dark</button>
     </div>
   </div>
   </div>
@@ -995,7 +995,7 @@ function mergeState(fmtId) {
   if (m.photoScale === undefined) m.photoScale = 100;
   if (m.showLogo === undefined) m.showLogo = true;
   if (m.logoWhite === undefined) m.logoWhite = false;
-  if (m.overlayMode === undefined) m.overlayMode = 'light';
+  if (m.overlayMode === undefined) m.overlayMode = 'dark';
   if (m.bsShowText === undefined) m.bsShowText = true;
   if (!m.bsText) m.bsText = 'Your text here';
   if (!m.bsFont) m.bsFont = 'Barlow';
@@ -1062,7 +1062,7 @@ function buildPost(fmt, s, containerW) {
   const H = Math.round(fmt.h * scale);
   const acc = s.accent;
   const style = s.layoutStyle || 'dark';
-  const isLight = (s.overlayMode || 'light') === 'light';
+  const isLight = (s.overlayMode || 'dark') === 'light';
 
   const wrap = document.createElement('div');
   wrap.className = 'post-canvas-wrap';
@@ -1081,7 +1081,7 @@ function buildPost(fmt, s, containerW) {
   // Tint overlay
   const tint = document.createElement('div');
   tint.className = 'tint-layer';
-  tint.style.background = buildTint(s.overlayDark, style, s.overlayMode||'light');
+  tint.style.background = buildTint(s.overlayDark, style, s.overlayMode||'dark');
   wrap.appendChild(tint);
 
   if (style === 'dark') {
@@ -1445,7 +1445,7 @@ function buildGrid() {
 
 // ── STYLE SWITCHER ──
 let currentStyle = 'dark';
-let currentOverlayMode = 'light';
+let currentOverlayMode = 'dark';
 
 function toggleAcc(header) {
   header.classList.toggle('collapsed');
