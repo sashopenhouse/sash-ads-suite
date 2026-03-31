@@ -1,0 +1,1963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New York Sash — Ad Export Suite</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Barlow:wght@300;400;500;600;700&family=Dancing+Script:wght@600;700&family=Oswald:wght@300;400;600;700&family=Montserrat:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Raleway:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Bebas+Neue&family=Pacifico&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0f0f0f; color: #e0d8cc; font-family: 'Barlow', sans-serif; min-height: 100vh; display: flex; }
+
+#sidebar {
+  width: 290px; min-width: 290px; background: #181818;
+  border-right: 1px solid #252525; padding: 20px 16px;
+  overflow-y: auto; display: flex; flex-direction: column; gap: 16px;
+  height: 100vh; position: sticky; top: 0;
+}
+#sidebar h1 { font-family:'Playfair Display',serif; font-style:italic; font-size:17px; font-weight:400; color:#e8d9b8; border-bottom:1px solid #252525; padding-bottom:12px; }
+#sidebar h1 span { display:block; font-size:9px; font-style:normal; letter-spacing:0.22em; color:#ae8d4d; text-transform:uppercase; margin-bottom:4px; }
+.section-label { font-size:9px; letter-spacing:0.25em; text-transform:uppercase; color:#ae8d4d; margin-bottom:8px; display:block; }
+.field-group { display:flex; flex-direction:column; gap:8px; }
+label { font-size:11px; color:#888; display:block; margin-bottom:3px; }
+input[type="text"], select { width:100%; background:#222; border:1px solid #333; color:#e0d8cc; font-family:'Barlow',sans-serif; font-size:12px; padding:7px 9px; border-radius:4px; outline:none; transition:border-color 0.2s; }
+input[type="text"]:focus, select:focus { border-color:#ae8d4d; }
+input[type="range"] { width:100%; accent-color:#ae8d4d; }
+.range-row { display:flex; align-items:center; gap:8px; }
+.range-row input { flex:1; }
+.range-val { font-size:11px; color:#ae8d4d; min-width:32px; text-align:right; }
+.toggle-row { display:flex; align-items:center; justify-content:space-between; }
+.toggle-row label { margin:0; }
+input[type="checkbox"] { width:15px; height:15px; accent-color:#ae8d4d; cursor:pointer; }
+input[type="color"] { width:32px; height:26px; border:1px solid #333; border-radius:4px; padding:2px; background:#222; cursor:pointer; }
+.color-row { display:flex; align-items:center; gap:8px; }
+.color-row label { margin:0; flex:1; }
+.upload-btn { display:block; width:100%; padding:8px; background:#222; border:1px dashed #3a3a3a; border-radius:4px; color:#ae8d4d; font-size:11px; text-align:center; cursor:pointer; transition:all 0.2s; }
+.upload-btn:hover { border-color:#ae8d4d; background:#28210e; }
+#fileInput { display:none; }
+.services-grid { display:grid; grid-template-columns:1fr 1fr; gap:5px; }
+.service-toggle { display:flex; align-items:center; gap:5px; font-size:11px; color:#aaa; cursor:pointer; padding:5px 7px; border:1px solid #2a2a2a; border-radius:4px; background:#1e1e1e; user-select:none; transition:border-color 0.15s; }
+.service-toggle input { width:12px; height:12px; accent-color:#ae8d4d; }
+.service-toggle:has(input:checked) { border-color:#ae8d4d; color:#e8d9b8; }
+hr.sep { border:none; border-top:1px solid #252525; }
+.btn-export-all { display:block; width:100%; padding:12px; background:#ae8d4d; color:#0b1928; font-weight:700; font-size:10px; letter-spacing:0.25em; text-transform:uppercase; border:none; border-radius:4px; cursor:pointer; transition:background 0.2s; }
+.btn-export-all:hover { background:#c9a55e; }
+.btn-export-all:disabled { background:#4a3d1e; color:#777; cursor:not-allowed; }
+#progress-wrap { display:none; margin-top:8px; }
+#progress-bar-outer { background:#2a2a2a; border-radius:4px; height:5px; overflow:hidden; }
+#progress-bar { height:100%; background:#ae8d4d; width:0; transition:width 0.2s; border-radius:4px; }
+#progress-label { font-size:10px; color:#666; margin-top:5px; }
+
+#main { flex:1; padding:24px 28px; overflow-y:auto; }
+#main > p { font-family:'Playfair Display',serif; font-size:13px; font-weight:400; font-style:italic; color:#555; margin-bottom:22px; }
+.formats-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:20px; }
+
+.format-card { background:#181818; border:1px solid #252525; border-radius:8px; overflow:hidden; transition:border-color 0.2s; }
+.format-card.active-edit { border-color:#ae8d4d55; }
+.format-card-header { padding:10px 14px; border-bottom:1px solid #1e1e1e; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.fch-left h3 { font-size:11px; font-weight:500; color:#e0d8cc; }
+.fch-left span { font-size:10px; color:#555; }
+.fch-right { display:flex; gap:6px; align-items:center; }
+.btn-sm { font-size:9px; letter-spacing:0.12em; text-transform:uppercase; padding:4px 9px; border-radius:3px; cursor:pointer; font-family:'Barlow',sans-serif; transition:all 0.15s; border:1px solid #333; background:#222; color:#777; white-space:nowrap; }
+.btn-sm:hover { border-color:#ae8d4d; color:#ae8d4d; }
+.btn-sm.active { border-color:#ae8d4d; color:#0b1928; background:#ae8d4d; }
+.btn-sm.export-sm { border-color:#2e2e2e; }
+
+.format-preview-wrap { padding:16px; display:flex; align-items:center; justify-content:center; background:#111; min-height:120px; }
+
+.format-overrides { display:none; padding:14px; background:#131313; border-top:1px solid #1e1e1e; flex-direction:column; gap:11px; }
+.format-overrides.open { display:flex; }
+.ov-section-head { display:flex; align-items:center; justify-content:space-between; }
+.ov-label { font-size:9px; letter-spacing:0.2em; text-transform:uppercase; color:#555; }
+.btn-reset { font-size:9px; color:#444; background:none; border:none; cursor:pointer; letter-spacing:0.1em; transition:color 0.15s; padding:0; }
+.btn-reset:hover { color:#ae8d4d; }
+.ov-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.ov-field { display:flex; flex-direction:column; gap:4px; }
+.ov-field label { font-size:10px; color:#666; margin:0; }
+.ov-range-row { display:flex; align-items:center; gap:6px; }
+.ov-range-row input[type="range"] { flex:1; accent-color:#ae8d4d; }
+.ov-range-val { font-size:10px; color:#ae8d4d; min-width:30px; text-align:right; }
+.ov-toggles { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; }
+.ov-tog { display:flex; align-items:center; justify-content:space-between; font-size:10px; color:#666; padding:5px 7px; border:1px solid #222; border-radius:3px; }
+.ov-tog input { width:13px; height:13px; accent-color:#ae8d4d; }
+.btn-export-fmt { width:100%; padding:7px; font-size:9px; letter-spacing:0.15em; text-transform:uppercase; border:1px solid #333; background:transparent; color:#777; border-radius:3px; cursor:pointer; font-family:'Barlow',sans-serif; transition:all 0.15s; margin-top:2px; }
+.btn-export-fmt:hover { border-color:#ae8d4d; color:#ae8d4d; }
+
+/* ── CUSTOMIZE MODAL ── */
+#customize-modal {
+  display:none; position:fixed; inset:0; z-index:1000;
+  background:rgba(0,0,0,0.85); backdrop-filter:blur(4px);
+  align-items:center; justify-content:center;
+}
+#customize-modal.open { display:flex; }
+#modal-inner {
+  background:#181818; border:1px solid #2e2e2e; border-radius:10px;
+  width:92vw; max-width:1100px; height:88vh; display:flex; flex-direction:column; overflow:hidden; min-height:0;
+}
+#modal-header {
+  padding:14px 20px; border-bottom:1px solid #222;
+  display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+}
+#modal-title { font-family:'Playfair Display',serif; font-style:italic; font-size:16px; color:#e8d9b8; }
+#modal-subtitle { font-size:10px; color:#555; letter-spacing:0.1em; margin-top:2px; }
+#modal-close {
+  font-size:18px; color:#555; background:none; border:none; cursor:pointer;
+  line-height:1; padding:4px 8px; border-radius:4px; transition:color 0.15s;
+}
+#modal-close:hover { color:#e0d8cc; }
+#modal-body { display:flex; flex:1; overflow:hidden; min-height:0; }
+#modal-preview {
+  flex:1; background:#111; display:flex; align-items:center; justify-content:center;
+  padding:24px; overflow:hidden; position:relative; min-width:0; min-height:0;
+}
+#modal-preview-inner { display:flex; align-items:center; justify-content:center; width:100%; height:100%; min-height:0; }
+#modal-controls {
+  width:320px; min-width:320px; background:#161616; border-left:1px solid #222;
+  padding:18px 16px; overflow-y:auto; display:flex; flex-direction:column; gap:12px;
+}
+#modal-controls .ov-label { font-size:9px; letter-spacing:0.25em; text-transform:uppercase; color:#ae8d4d; margin-bottom:2px; display:block; }
+#modal-controls label { font-size:11px; color:#888; display:block; margin-bottom:3px; }
+#modal-controls input[type="text"], #modal-controls select {
+  width:100%; background:#222; border:1px solid #333; color:#e0d8cc;
+  font-family:'Barlow',sans-serif; font-size:12px; padding:7px 9px;
+  border-radius:4px; outline:none; transition:border-color 0.2s;
+}
+#modal-controls input[type="text"]:focus, #modal-controls select:focus { border-color:#ae8d4d; }
+#modal-controls input[type="range"] { width:100%; accent-color:#ae8d4d; }
+#modal-controls .range-row { display:flex; align-items:center; gap:8px; }
+#modal-controls .range-row input { flex:1; }
+#modal-controls .range-val { font-size:11px; color:#ae8d4d; min-width:32px; text-align:right; }
+#modal-controls hr { border:none; border-top:1px solid #222; }
+.modal-toggle-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; }
+.modal-tog { display:flex; align-items:center; justify-content:space-between; font-size:10px; color:#777; padding:6px 8px; border:1px solid #222; border-radius:4px; }
+.modal-tog input { width:13px; height:13px; accent-color:#ae8d4d; }
+#modal-reset { font-size:9px; color:#444; background:none; border:none; cursor:pointer; letter-spacing:0.1em; transition:color 0.15s; padding:0; }
+#modal-reset:hover { color:#ae8d4d; }
+.modal-footer { padding:14px 20px; border-top:1px solid #222; display:flex; gap:10px; justify-content:flex-end; flex-shrink:0; }
+.modal-btn-export { padding:9px 20px; background:#ae8d4d; color:#0b1928; font-weight:700; font-size:9px; letter-spacing:0.22em; text-transform:uppercase; border:none; border-radius:4px; cursor:pointer; font-family:'Barlow',sans-serif; transition:background 0.15s; }
+.modal-btn-export:hover { background:#c9a55e; }
+.modal-btn-done { padding:9px 20px; background:transparent; color:#777; font-weight:500; font-size:9px; letter-spacing:0.18em; text-transform:uppercase; border:1px solid #333; border-radius:4px; cursor:pointer; font-family:'Barlow',sans-serif; transition:all 0.15s; }
+.modal-btn-done:hover { border-color:#ae8d4d; color:#ae8d4d; }
+
+.style-picker { display:flex; flex-direction:column; gap:6px; }
+.style-opt { display:flex; align-items:center; gap:10px; padding:8px 10px; border:1px solid #2a2a2a; border-radius:6px; cursor:pointer; transition:all 0.15s; background:#1e1e1e; }
+.style-opt:hover { border-color:#555; }
+.style-opt.active { border-color:#ae8d4d; background:#251f0f; }
+.sb-hidden { display: none !important; }
+.bs-panel { border-bottom:1px solid #222; }
+.bs-acc-header { display:flex; justify-content:space-between; align-items:center; cursor:pointer; padding:8px 0 5px; font-size:10px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:#ccc; user-select:none; }
+.bs-acc-header::after { content:'▾'; font-size:11px; color:#ae8d4d; transition:transform 0.15s; flex-shrink:0; }
+.bs-acc-header.collapsed::after { transform:rotate(-90deg); }
+.bs-acc-body { padding-bottom:4px; }
+.bs-acc-body.collapsed { display:none; }
+.style-swatch { width:32px; height:32px; border-radius:4px; flex-shrink:0; }
+.dark-swatch { background:linear-gradient(135deg,#0e1e36 60%,#ae8d4d 100%); }
+.light-swatch { background:linear-gradient(135deg,#f0ebe0 60%,#7a6a4a 100%); }
+.style-opt-label { font-size:11px; color:#bbb; line-height:1.4; }
+.style-opt-label span { font-size:9px; color:#555; }
+.bold-swatch { background: linear-gradient(135deg, #1a1a2e 60%, #cc2222 100%); }
+.blank-slate-swatch { background: linear-gradient(135deg, #cc2222 55%, #ff5555 100%); }
+
+.overlay-mode-toggle { display:flex; gap:6px; }
+.om-btn { flex:1; padding:7px 0; font-size:10px; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; font-family:'Barlow',sans-serif; border:1px solid #2a2a2a; border-radius:4px; background:#1e1e1e; color:#666; cursor:pointer; transition:all 0.15s; }
+.om-btn:hover { border-color:#555; color:#aaa; }
+.om-btn.active { border-color:#ae8d4d; background:#251f0f; color:#e8d9b8; }
+
+.mc-section { display:flex; flex-direction:column; gap:7px; }
+.mc-section-head { font-size:9px; letter-spacing:0.22em; text-transform:uppercase; color:#ae8d4d; margin-bottom:2px; }
+.mc-services-grid { display:grid; grid-template-columns:1fr 1fr; gap:5px; }
+.mc-svc-tog { display:flex; align-items:center; gap:6px; font-size:11px; color:#aaa; cursor:pointer; padding:5px 8px; border:1px solid #2a2a2a; border-radius:4px; background:#1e1e1e; user-select:none; transition:border-color 0.15s; }
+.mc-svc-tog input { width:12px; height:12px; accent-color:#ae8d4d; flex-shrink:0; }
+.mc-svc-tog:has(input:checked) { border-color:#ae8d4d; color:#e8d9b8; }
+
+.post-canvas-wrap { position:relative; overflow:hidden; flex-shrink:0; }
+.photo-bg-layer { position:absolute; inset:0; background-size:cover; }
+.tint-layer { position:absolute; inset:0; }
+
+.content-layer { position:absolute; bottom:0; left:0; right:0; text-align:center; pointer-events:none; }
+.eyebrow-el { font-weight:300; letter-spacing:0.3em; text-transform:uppercase; display:block; }
+.headline-el { font-family:'Playfair Display',serif; font-weight:400; color:#f5eedf; line-height:1.15; }
+.services-el { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; }
+.svc-item-el { font-weight:400; letter-spacing:0.18em; text-transform:uppercase; color:#c8b98a; }
+.svc-dot-el { border-radius:50%; opacity:0.8; flex-shrink:0; }
+.divider-el { display:flex; align-items:center; justify-content:center; }
+.div-line-el { height:0.5px; opacity:0.5; }
+.div-diamond-el { transform:rotate(45deg); opacity:0.8; }
+.cta-el { display:inline-block; font-weight:500; letter-spacing:0.22em; text-transform:uppercase; color:#0b1928; }
+
+/* ── Templates ─────────────────────────────────────────────── */
+#tpl-list { display:flex; flex-direction:column; gap:4px; margin-top:6px; }
+.tpl-empty { font-size:10px; color:#444; padding:4px 0; }
+.tpl-item { display:flex; align-items:center; gap:6px; background:#1e1e1e; border:1px solid #2a2a2a; border-radius:4px; padding:5px 8px; transition:border-color 0.15s; }
+.tpl-item:hover { border-color:#ae8d4d44; }
+.tpl-name { flex:1; font-size:11px; color:#c8b87e; cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tpl-name:hover { color:#e8d9b8; text-decoration:underline; }
+.tpl-del { background:none; border:none; color:#444; font-size:10px; cursor:pointer; padding:2px 5px; border-radius:3px; line-height:1; flex-shrink:0; transition:all 0.15s; }
+.tpl-del:hover { color:#c44; background:#2a1616; }
+.tpl-save-row { display:flex; gap:6px; }
+.tpl-save-row input { flex:1; min-width:0; }
+.btn-tpl-save { font-size:9px; letter-spacing:0.12em; text-transform:uppercase; padding:6px 10px; border-radius:3px; cursor:pointer; font-family:'Barlow',sans-serif; border:1px solid #ae8d4d55; background:#1e1a0e; color:#ae8d4d; white-space:nowrap; transition:all 0.15s; }
+.btn-tpl-save:hover { background:#2a220e; border-color:#ae8d4d; }
+.btn-tpl-save:disabled { opacity:0.5; cursor:not-allowed; }
+/* ── Auth ──────────────────────────────────────────────────────────────────── */
+#auth-overlay { position:fixed; inset:0; background:#0f0f0f; z-index:9999; display:flex; align-items:center; justify-content:center; }
+#auth-card { background:#181818; border:1px solid #252525; border-radius:12px; padding:36px 32px; width:320px; display:flex; flex-direction:column; gap:16px; }
+#auth-card h2 { font-family:'Playfair Display',serif; font-style:italic; font-size:20px; font-weight:400; color:#e8d9b8; }
+#auth-card .auth-sub { font-size:11px; color:#666; line-height:1.6; }
+#auth-email-input { width:100%; background:#222; border:1px solid #333; color:#e0d8cc; font-family:'Barlow',sans-serif; font-size:12px; padding:9px 11px; border-radius:4px; outline:none; transition:border-color 0.2s; }
+#auth-email-input:focus { border-color:#ae8d4d; }
+#auth-submit-btn { padding:10px; background:#ae8d4d; color:#0b1928; font-weight:700; font-size:10px; letter-spacing:0.25em; text-transform:uppercase; border:none; border-radius:4px; cursor:pointer; font-family:'Barlow',sans-serif; transition:background 0.2s; }
+#auth-submit-btn:hover { background:#c9a55e; }
+#auth-submit-btn:disabled { background:#4a3d1e; color:#777; cursor:not-allowed; }
+#auth-msg { font-size:11px; min-height:16px; text-align:center; }
+#user-badge { display:none; align-items:center; justify-content:space-between; padding:7px 10px; background:#1e1a0e; border:1px solid #2e2610; border-radius:4px; }
+.user-badge-email { font-size:10px; color:#ae8d4d; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.btn-signout { font-size:9px; color:#555; background:none; border:none; cursor:pointer; letter-spacing:0.1em; padding:0 0 0 8px; flex-shrink:0; transition:color 0.15s; white-space:nowrap; }
+.btn-signout:hover { color:#c44; }
+</style>
+</head>
+<body>
+
+<!-- AUTH OVERLAY -->
+<div id="auth-overlay">
+  <div id="auth-card">
+    <div>
+      <div style="font-size:9px;letter-spacing:0.22em;color:#ae8d4d;text-transform:uppercase;margin-bottom:8px;">New York Sash</div>
+      <h2>Ad Export Suite</h2>
+    </div>
+    <p class="auth-sub">Sign in with your team email address to access shared templates and synced assets.</p>
+    <input type="email" id="auth-email-input" placeholder="your@email.com" onkeydown="if(event.key==='Enter')sendMagicLink()">
+    <button id="auth-submit-btn" onclick="sendMagicLink()">Send Magic Link</button>
+    <div id="auth-msg"></div>
+  </div>
+</div>
+
+<div id="sidebar">
+  <h1><span>New York Sash</span>Ad Export Suite</h1>
+  <div id="user-badge">
+    <span class="user-badge-email" id="user-badge-email"></span>
+    <button class="btn-signout" onclick="signOut()">Sign out</button>
+  </div>
+
+  <div>
+    <span class="section-label">Photo</span>
+    <div class="field-group">
+      <div class="upload-btn" onclick="document.getElementById('fileInput').click()">+ Upload Image</div>
+      <input type="file" id="fileInput" accept="image/*">
+      <label>Vertical position</label>
+      <div class="range-row">
+        <input type="range" id="photoY" min="0" max="100" value="30">
+        <span class="range-val" id="photoYVal">30%</span>
+      </div>
+      <label>Scale</label>
+      <div class="range-row">
+        <input type="range" id="photoScale" min="50" max="250" value="100" step="1">
+        <span class="range-val" id="photoScaleVal">100%</span>
+      </div>
+      <div id="sb-overlay-dark">
+      <label>Overlay darkness</label>
+      <div class="range-row">
+        <input type="range" id="overlayDark" min="0" max="90" value="55">
+        <span class="range-val" id="overlayDarkVal">55%</span>
+      </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <hr class="sep">
+  <div>
+    <span class="section-label">Layout Style</span>
+    <div class="style-picker" id="style-picker">
+      <div class="style-opt active" data-style="dark" onclick="setStyle('dark')">
+        <div class="style-swatch dark-swatch"></div>
+        <div class="style-opt-label">Dark &amp; Refined<br><span>Navy, gold accents</span></div>
+      </div>
+      <div class="style-opt" data-style="light" onclick="setStyle('light')">
+        <div class="style-swatch light-swatch"></div>
+        <div class="style-opt-label">Natural &amp; Light<br><span>Cream, forest tones</span></div>
+      </div>
+      <div class="style-opt" data-style="bold" onclick="setStyle('bold')">
+        <div class="style-swatch bold-swatch"></div>
+        <div class="style-opt-label">Bold &amp; Modern<br><span>Charcoal, red accent</span></div>
+      </div>
+      <div class="style-opt" data-style="blank-slate" onclick="setStyle('blank-slate')">
+        <div class="style-swatch blank-slate-swatch"></div>
+        <div class="style-opt-label">Blank Slate<br><span>Custom background</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="sb-wrap-overlay-mode">
+  <hr class="sep">
+  <div>
+    <span class="section-label">Overlay Mode</span>
+    <div class="overlay-mode-toggle">
+      <button class="om-btn active" id="om-light" onclick="setOverlayMode('light')">☀ Light</button>
+      <button class="om-btn" id="om-dark" onclick="setOverlayMode('dark')">◑ Dark</button>
+    </div>
+  </div>
+  </div>
+
+  <div id="sb-wrap-content-scale">
+  <hr class="sep">
+  <div>
+    <span class="section-label">Content Scale</span>
+    <div class="field-group">
+      <div class="range-row">
+        <input type="range" id="contentScale" min="50" max="200" value="100" step="1">
+        <span class="range-val" id="contentScaleVal">100%</span>
+      </div>
+      <div style="font-size:10px;color:#444;margin-top:-2px;">Scales all text, spacing &amp; elements</div>
+    </div>
+  </div>
+  </div>
+
+  <div id="sb-wrap-copy">
+  <hr class="sep">
+  <div>
+    <span class="section-label">Copy</span>
+    <div class="field-group">
+      <label>Eyebrow</label>
+      <input type="text" id="eyebrow" value="Serving Upstate New York">
+      <label>Headline (| = line break)</label>
+      <input type="text" id="headline" value="Built for Homes | That Have a Story.">
+      <label>Style</label>
+      <select id="headlineStyle">
+        <option value="mixed" selected>Mixed (italic + bold)</option>
+        <option value="italic">All italic</option>
+        <option value="normal">All upright</option>
+      </select>
+      <label>Headline size</label>
+      <div class="range-row">
+        <input type="range" id="headlineSize" min="12" max="60" value="32">
+        <span class="range-val" id="headlineSizeVal">32px</span>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <div id="sb-wrap-services">
+  <hr class="sep">
+  <div>
+    <span class="section-label">Services</span>
+    <div class="services-grid" id="services-grid">
+      <label class="service-toggle"><input type="checkbox" checked data-svc="Windows"> Windows</label>
+      <label class="service-toggle"><input type="checkbox" checked data-svc="Doors"> Doors</label>
+      <label class="service-toggle"><input type="checkbox" checked data-svc="Siding"> Siding</label>
+      <label class="service-toggle"><input type="checkbox" checked data-svc="Baths"> Baths</label>
+    </div>
+  </div>
+  </div>
+
+  <div id="sb-wrap-cta">
+  <hr class="sep">
+  <div>
+    <span class="section-label">Call to Action</span>
+    <div class="field-group">
+      <label>Button text</label>
+      <input type="text" id="ctaText" value="Schedule a Free Consultation">
+      <div class="toggle-row"><label>Show button</label><input type="checkbox" id="showCta" checked></div>
+      <div class="color-row">
+        <input type="color" id="accentColor" value="#ae8d4d">
+        <label>Accent color</label>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <hr class="sep">
+  <div>
+    <span class="section-label">Decorations</span>
+    <div class="field-group">
+      <div id="sb-corners-divider">
+      <div class="toggle-row"><label>Corner ornaments</label><input type="checkbox" id="showCorners" checked></div>
+      <div class="toggle-row"><label>Gold divider</label><input type="checkbox" id="showDivider" checked></div>
+      </div>
+      <div class="toggle-row"><label>Show logo</label><input type="checkbox" id="showLogo" checked></div>
+      <div class="toggle-row"><label>White logo</label><input type="checkbox" id="logoWhite"></div>
+    </div>
+  </div>
+
+  <div id="sb-wrap-blank-slate-text" class="sb-hidden">
+  <hr class="sep">
+
+  <div class="bs-panel">
+    <div class="bs-acc-header" onclick="toggleAcc(this)">Background</div>
+    <div class="bs-acc-body">
+      <div class="field-group">
+        <div class="upload-btn" onclick="document.getElementById('blankSlateBgInput').click()">+ Upload Background Image</div>
+        <input type="file" id="blankSlateBgInput" accept="image/*" style="display:none;">
+        <div id="blankSlateBgName" style="font-size:10px;color:#555;margin-top:4px;"></div>
+        <div class="color-row" style="margin-top:8px;">
+          <input type="color" id="bsBgColor" value="#cc2222">
+          <label>Solid color (no image)</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bs-panel">
+    <div class="bs-acc-header collapsed" onclick="toggleAcc(this)">Image Layer 2</div>
+    <div class="bs-acc-body collapsed">
+      <div class="field-group">
+        <div class="toggle-row"><label>Show image 2</label><input type="checkbox" id="bs2ImgShow"></div>
+        <div class="upload-btn" onclick="document.getElementById('bs2ImgInput').click()">+ Upload Image 2</div>
+        <input type="file" id="bs2ImgInput" accept="image/*" style="display:none;">
+        <div id="bs2ImgName" style="font-size:10px;color:#555;margin-top:4px;"></div>
+        <label>Scale</label>
+        <div class="range-row">
+          <input type="range" id="bs2ImgScale" min="10" max="200" value="60" step="1">
+          <span class="range-val" id="bs2ImgScaleVal">60%</span>
+        </div>
+        <label>Vertical position</label>
+        <div class="range-row">
+          <input type="range" id="bs2ImgY" min="-45" max="45" value="0" step="1">
+          <span class="range-val" id="bs2ImgYVal">0%</span>
+        </div>
+        <label>Horizontal position</label>
+        <div class="range-row">
+          <input type="range" id="bs2ImgX" min="-45" max="45" value="0" step="1">
+          <span class="range-val" id="bs2ImgXVal">0%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bs-panel">
+    <div class="bs-acc-header" onclick="toggleAcc(this)">Text Layer 1</div>
+    <div class="bs-acc-body">
+      <div class="field-group">
+        <div class="toggle-row"><label>Show text</label><input type="checkbox" id="bsShowText" checked></div>
+        <label>Text (| = line break)</label>
+        <input type="text" id="bsText" value="Your text here">
+        <label>Font</label>
+        <select id="bsFont">
+          <option value="Barlow" selected>Barlow (clean sans-serif)</option>
+          <option value="Oswald">Oswald (condensed bold)</option>
+          <option value="Montserrat">Montserrat (modern geometric)</option>
+          <option value="Raleway">Raleway (thin &amp; elegant)</option>
+          <option value="Playfair Display">Playfair Display (elegant serif)</option>
+          <option value="Dancing Script">Dancing Script (handwritten)</option>
+          <option value="Bebas Neue">Bebas Neue (display / all-caps)</option>
+          <option value="Pacifico">Pacifico (friendly script)</option>
+        </select>
+        <div class="color-row">
+          <input type="color" id="bsTextColor" value="#ffffff">
+          <label>Text color</label>
+        </div>
+        <label>Size</label>
+        <div class="range-row">
+          <input type="range" id="bsTextSize" min="16" max="120" value="54" step="1">
+          <span class="range-val" id="bsTextSizeVal">54px</span>
+        </div>
+        <div class="toggle-row"><label>Bold</label><input type="checkbox" id="bsTextBold" checked></div>
+        <div class="toggle-row"><label>Italic</label><input type="checkbox" id="bsTextItalic"></div>
+        <label>Alignment</label>
+        <select id="bsTextAlign">
+          <option value="center" selected>Center</option>
+          <option value="left">Left</option>
+          <option value="right">Right</option>
+        </select>
+        <label>Vertical position</label>
+        <div class="range-row">
+          <input type="range" id="bsTextY" min="-45" max="45" value="0" step="1">
+          <span class="range-val" id="bsTextYVal">0%</span>
+        </div>
+        <label>Rotation</label>
+        <div class="range-row">
+          <input type="range" id="bsTextRotate" min="-180" max="180" value="0" step="1">
+          <span class="range-val" id="bsTextRotateVal">0°</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bs-panel">
+    <div class="bs-acc-header collapsed" onclick="toggleAcc(this)">Text Layer 2</div>
+    <div class="bs-acc-body collapsed">
+      <div class="field-group">
+        <div class="toggle-row"><label>Show text 2</label><input type="checkbox" id="bs2ShowText"></div>
+        <label>Text (| = line break)</label>
+        <input type="text" id="bs2Text" value="">
+        <label>Font</label>
+        <select id="bs2Font">
+          <option value="Barlow" selected>Barlow (clean sans-serif)</option>
+          <option value="Oswald">Oswald (condensed bold)</option>
+          <option value="Montserrat">Montserrat (modern geometric)</option>
+          <option value="Raleway">Raleway (thin &amp; elegant)</option>
+          <option value="Playfair Display">Playfair Display (elegant serif)</option>
+          <option value="Dancing Script">Dancing Script (handwritten)</option>
+          <option value="Bebas Neue">Bebas Neue (display / all-caps)</option>
+          <option value="Pacifico">Pacifico (friendly script)</option>
+        </select>
+        <div class="color-row">
+          <input type="color" id="bs2TextColor" value="#ffffff">
+          <label>Text color</label>
+        </div>
+        <label>Size</label>
+        <div class="range-row">
+          <input type="range" id="bs2TextSize" min="10" max="120" value="32" step="1">
+          <span class="range-val" id="bs2TextSizeVal">32px</span>
+        </div>
+        <div class="toggle-row"><label>Bold</label><input type="checkbox" id="bs2TextBold"></div>
+        <div class="toggle-row"><label>Italic</label><input type="checkbox" id="bs2TextItalic"></div>
+        <label>Alignment</label>
+        <select id="bs2TextAlign">
+          <option value="center" selected>Center</option>
+          <option value="left">Left</option>
+          <option value="right">Right</option>
+        </select>
+        <label>Vertical position</label>
+        <div class="range-row">
+          <input type="range" id="bs2TextY" min="-45" max="45" value="20" step="1">
+          <span class="range-val" id="bs2TextYVal">+20%</span>
+        </div>
+        <label>Rotation</label>
+        <div class="range-row">
+          <input type="range" id="bs2TextRotate" min="-180" max="180" value="0" step="1">
+          <span class="range-val" id="bs2TextRotateVal">0°</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div>
+
+  <hr class="sep">
+  <div id="sb-templates">
+    <span class="section-label">Templates</span>
+    <div class="field-group">
+      <div class="tpl-save-row">
+        <input type="text" id="tplNameInput" placeholder="Template name…" onkeydown="if(event.key==='Enter')saveTemplate()">
+        <button class="btn-tpl-save" onclick="saveTemplate()">Save</button>
+      </div>
+      <div id="tpl-list"><div class="tpl-empty">No saved templates</div></div>
+    </div>
+  </div>
+
+  <hr class="sep">
+  <div>
+    <span class="section-label">Export</span>
+    <div class="field-group">
+      <label>File name <span style="color:#555;font-weight:400;">(leave blank to use headline)</span></label>
+      <input type="text" id="exportName" placeholder="e.g. spring-promo" style="margin-bottom:8px;">
+    </div>
+    <button class="btn-export-all" id="exportAllBtn" onclick="exportAll()">Export All Formats (ZIP)</button>
+    <div id="progress-wrap">
+      <div id="progress-bar-outer"><div id="progress-bar"></div></div>
+      <div id="progress-label">Preparing…</div>
+    </div>
+  </div>
+</div>
+
+<div id="main">
+  <p>Global settings apply to all formats — click <strong style="color:#ae8d4d;font-style:normal;">Customize</strong> on any card to override individual settings for that size</p>
+  <div class="formats-grid" id="formats-grid"></div>
+</div>
+
+<div id="render-pool" style="position:fixed;left:-9999px;top:0;pointer-events:none;opacity:0;"></div>
+
+<!-- CUSTOMIZE MODAL -->
+<div id="customize-modal">
+  <div id="modal-inner">
+    <div id="modal-header">
+      <div>
+        <div id="modal-title">Customize Format</div>
+        <div id="modal-subtitle"></div>
+      </div>
+      <button id="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-body">
+      <div id="modal-preview">
+        <div id="modal-preview-inner"></div>
+      </div>
+      <div id="modal-controls">
+
+        <!-- Header -->
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+          <span class="ov-label" style="color:#ae8d4d;">Per-format overrides</span>
+          <button id="modal-reset" onclick="modalResetOv()" style="display:none;">↺ Reset all</button>
+        </div>
+
+        <!-- SECTION: Photo -->
+        <div class="mc-section">
+          <div class="mc-section-head">Photo &amp; Overlay</div>
+          <label>Vertical crop</label>
+          <div class="range-row"><input type="range" id="m-photoY" min="0" max="100" value="30" oninput="mOv('photoY',+this.value);mtxt('m-photoY-val',this.value+'%')"><span class="range-val" id="m-photoY-val">30%</span></div>
+          <label>Scale</label>
+          <div class="range-row"><input type="range" id="m-photoScale" min="50" max="250" value="100" step="1" oninput="mOv('photoScale',+this.value);mtxt('m-photoScale-val',this.value+'%')"><span class="range-val" id="m-photoScale-val">100%</span></div>
+          <div id="m-wrap-overlay-dark">
+          <label>Overlay darkness</label>
+          <div class="range-row"><input type="range" id="m-overlay" min="0" max="90" value="55" oninput="mOv('overlayDark',+this.value);mtxt('m-overlay-val',this.value+'%')"><span class="range-val" id="m-overlay-val">55%</span></div>
+          </div>
+        </div>
+
+        <div id="m-wrap-content-scale">
+        <hr>
+
+        <!-- SECTION: Content Scale -->
+        <div class="mc-section">
+          <div class="mc-section-head">Content Scale</div>
+          <div class="range-row"><input type="range" id="m-contentScale" min="50" max="200" value="100" step="1" oninput="mOv('contentScale',+this.value/100);mtxt('m-contentScale-val',this.value+'%')"><span class="range-val" id="m-contentScale-val">100%</span></div>
+        </div>
+        </div>
+
+        <div id="m-wrap-overlay-mode">
+        <hr>
+
+        <!-- SECTION: Overlay Mode -->
+        <div class="mc-section">
+          <div class="mc-section-head">Overlay Mode</div>
+          <div class="overlay-mode-toggle">
+            <button class="om-btn" id="m-om-light" onclick="mOvOverlay('light')">☀ Light</button>
+            <button class="om-btn" id="m-om-dark" onclick="mOvOverlay('dark')">◑ Dark</button>
+          </div>
+        </div>
+        </div>
+
+        <hr>
+
+        <!-- SECTION: Logo -->
+        <div class="mc-section">
+          <div class="mc-section-head">Logo</div>
+          <label>Size</label>
+          <div class="range-row"><input type="range" id="m-logoSize" min="10" max="80" value="34" oninput="mOv('logoSize',+this.value);mtxt('m-logoSize-val',this.value+'px')"><span class="range-val" id="m-logoSize-val">34px</span></div>
+          <label>Vertical position</label>
+          <div class="range-row"><input type="range" id="m-logoY" min="0" max="100" value="4" oninput="mOv('logoY',+this.value);mtxt('m-logoY-val',this.value+'%')"><span class="range-val" id="m-logoY-val">4%</span></div>
+        </div>
+
+        <hr>
+
+        <!-- SECTION: Content position -->
+        <div class="mc-section">
+          <div class="mc-section-head">Content Position</div>
+          <label>Text block vertical offset</label>
+          <div class="range-row"><input type="range" id="m-contentY" min="-40" max="40" value="0" oninput="mOv('contentY',+this.value);mtxt('m-contentY-val',(this.value>0?'+':'')+this.value+'%')"><span class="range-val" id="m-contentY-val">0%</span></div>
+        </div>
+
+        <div id="m-wrap-copy">
+        <hr>
+
+        <!-- SECTION: Copy -->
+        <div class="mc-section">
+          <div class="mc-section-head">Copy</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <label style="margin:0;">Show eyebrow</label>
+            <input type="checkbox" id="m-showEyebrow" onchange="mOv('showEyebrow',this.checked)" style="width:14px;height:14px;accent-color:#ae8d4d;">
+          </div>
+          <label>Eyebrow text</label>
+          <input type="text" id="m-eyebrow" oninput="mOv('eyebrow',this.value)">
+          <label>Headline (| = line break)</label>
+          <input type="text" id="m-headline" oninput="mOv('headline',this.value)">
+          <label>Headline style</label>
+          <select id="m-hlstyle" onchange="mOv('headlineStyle',this.value)">
+            <option value="mixed">Mixed (italic + bold)</option>
+            <option value="italic">All italic</option>
+            <option value="normal">All upright</option>
+          </select>
+          <label>CTA text</label>
+          <input type="text" id="m-cta" oninput="mOv('ctaText',this.value)">
+        </div>
+        </div>
+
+        <div id="m-wrap-font-sizes">
+        <hr>
+
+        <!-- SECTION: Font sizes -->
+        <div class="mc-section">
+          <div class="mc-section-head">Font Sizes</div>
+          <label>Headline</label>
+          <div class="range-row"><input type="range" id="m-hlsize" min="10" max="60" value="32" oninput="mOv('headlineSize',+this.value);mtxt('m-hlsize-val',this.value+'px')"><span class="range-val" id="m-hlsize-val">32px</span></div>
+          <label>Eyebrow</label>
+          <div class="range-row"><input type="range" id="m-eyebrowSize" min="6" max="20" value="9" oninput="mOv('eyebrowSize',+this.value);mtxt('m-eyebrowSize-val',this.value+'px')"><span class="range-val" id="m-eyebrowSize-val">9px</span></div>
+          <label>Services</label>
+          <div class="range-row"><input type="range" id="m-svcSize" min="6" max="20" value="10" oninput="mOv('svcSize',+this.value);mtxt('m-svcSize-val',this.value+'px')"><span class="range-val" id="m-svcSize-val">10px</span></div>
+          <label>CTA button</label>
+          <div class="range-row"><input type="range" id="m-ctaSize" min="6" max="18" value="9" oninput="mOv('ctaSize',+this.value);mtxt('m-ctaSize-val',this.value+'px')"><span class="range-val" id="m-ctaSize-val">9px</span></div>
+        </div>
+        </div>
+
+        <div id="m-wrap-services">
+        <hr>
+
+        <!-- SECTION: Services -->
+        <div class="mc-section">
+          <div class="mc-section-head">Services (this format)</div>
+          <div class="mc-services-grid" id="m-services-grid">
+            <label class="mc-svc-tog"><input type="checkbox" data-svc="Windows" onchange="mSvcChange()"> Windows</label>
+            <label class="mc-svc-tog"><input type="checkbox" data-svc="Doors" onchange="mSvcChange()"> Doors</label>
+            <label class="mc-svc-tog"><input type="checkbox" data-svc="Siding" onchange="mSvcChange()"> Siding</label>
+            <label class="mc-svc-tog"><input type="checkbox" data-svc="Baths" onchange="mSvcChange()"> Baths</label>
+          </div>
+          <div style="font-size:9px;color:#444;margin-top:2px;">Leave all unchecked to use global services</div>
+        </div>
+        </div>
+
+        <hr>
+
+        <!-- SECTION: Visibility -->
+        <div class="mc-section">
+          <div class="mc-section-head">Show / Hide</div>
+          <div class="modal-toggle-grid">
+            <div class="modal-tog" id="m-tog-cta"><span>CTA</span><input type="checkbox" id="m-showCta" onchange="mOv('showCta',this.checked)"></div>
+            <div class="modal-tog" id="m-tog-corners"><span>Corners</span><input type="checkbox" id="m-showCorners" onchange="mOv('showCorners',this.checked)"></div>
+            <div class="modal-tog" id="m-tog-divider"><span>Divider</span><input type="checkbox" id="m-showDivider" onchange="mOv('showDivider',this.checked)"></div>
+            <div class="modal-tog"><span>Logo</span><input type="checkbox" id="m-showLogo" onchange="mOv('showLogo',this.checked)"></div>
+            <div class="modal-tog"><span>White logo</span><input type="checkbox" id="m-logoWhite" onchange="mOv('logoWhite',this.checked)"></div>
+          </div>
+        </div>
+
+        <!-- SECTION: Blank Slate overrides -->
+        <div id="m-wrap-blank-slate" class="sb-hidden">
+
+          <div class="bs-panel">
+            <div class="bs-acc-header" onclick="toggleAcc(this)">Background</div>
+            <div class="bs-acc-body">
+              <div class="mc-section">
+                <div class="color-row"><input type="color" id="m-bsBgColor" value="#cc2222" oninput="mOv('bsBgColor',this.value)"><label>Solid color (no image)</label></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bs-panel">
+            <div class="bs-acc-header collapsed" onclick="toggleAcc(this)">Image Layer 2</div>
+            <div class="bs-acc-body collapsed">
+              <div class="mc-section">
+                <div class="modal-toggle-grid"><div class="modal-tog"><span>Show</span><input type="checkbox" id="m-bs2ImgShow" onchange="mOv('bs2ImgShow',this.checked)"></div></div>
+                <label>Scale</label>
+                <div class="range-row"><input type="range" id="m-bs2ImgScale" min="10" max="200" value="60" step="1" oninput="mOv('bs2ImgScale',+this.value);mtxt('m-bs2ImgScale-val',this.value+'%')"><span class="range-val" id="m-bs2ImgScale-val">60%</span></div>
+                <label>Vertical position</label>
+                <div class="range-row"><input type="range" id="m-bs2ImgY" min="-45" max="45" value="0" step="1" oninput="mOv('bs2ImgY',+this.value);mtxt('m-bs2ImgY-val',(+this.value>0?'+':'')+this.value+'%')"><span class="range-val" id="m-bs2ImgY-val">0%</span></div>
+                <label>Horizontal position</label>
+                <div class="range-row"><input type="range" id="m-bs2ImgX" min="-45" max="45" value="0" step="1" oninput="mOv('bs2ImgX',+this.value);mtxt('m-bs2ImgX-val',(+this.value>0?'+':'')+this.value+'%')"><span class="range-val" id="m-bs2ImgX-val">0%</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bs-panel">
+            <div class="bs-acc-header" onclick="toggleAcc(this)">Text Layer 1</div>
+            <div class="bs-acc-body">
+              <div class="mc-section">
+                <div class="modal-toggle-grid"><div class="modal-tog"><span>Show</span><input type="checkbox" id="m-bsShowText" onchange="mOv('bsShowText',this.checked)"></div></div>
+                <label>Text (| = line break)</label>
+                <input type="text" id="m-bsText" oninput="mOv('bsText',this.value)">
+                <label>Font</label>
+                <select id="m-bsFont" onchange="mOv('bsFont',this.value)">
+                  <option value="Barlow">Barlow</option><option value="Oswald">Oswald</option><option value="Montserrat">Montserrat</option><option value="Raleway">Raleway</option><option value="Playfair Display">Playfair Display</option><option value="Dancing Script">Dancing Script</option><option value="Bebas Neue">Bebas Neue</option><option value="Pacifico">Pacifico</option>
+                </select>
+                <div class="color-row"><input type="color" id="m-bsTextColor" value="#ffffff" oninput="mOv('bsTextColor',this.value)"><label>Color</label></div>
+                <label>Size</label>
+                <div class="range-row"><input type="range" id="m-bsTextSize" min="16" max="120" value="54" step="1" oninput="mOv('bsTextSize',+this.value);mtxt('m-bsTextSize-val',this.value+'px')"><span class="range-val" id="m-bsTextSize-val">54px</span></div>
+                <div class="modal-toggle-grid">
+                  <div class="modal-tog"><span>Bold</span><input type="checkbox" id="m-bsTextBold" onchange="mOv('bsTextBold',this.checked)"></div>
+                  <div class="modal-tog"><span>Italic</span><input type="checkbox" id="m-bsTextItalic" onchange="mOv('bsTextItalic',this.checked)"></div>
+                </div>
+                <label>Alignment</label>
+                <select id="m-bsTextAlign" onchange="mOv('bsTextAlign',this.value)"><option value="center">Center</option><option value="left">Left</option><option value="right">Right</option></select>
+                <label>Vertical position</label>
+                <div class="range-row"><input type="range" id="m-bsTextY" min="-45" max="45" value="0" step="1" oninput="mOv('bsTextY',+this.value);mtxt('m-bsTextY-val',(+this.value>0?'+':'')+this.value+'%')"><span class="range-val" id="m-bsTextY-val">0%</span></div>
+                <label>Rotation</label>
+                <div class="range-row"><input type="range" id="m-bsTextRotate" min="-180" max="180" value="0" step="1" oninput="mOv('bsTextRotate',+this.value);mtxt('m-bsTextRotate-val',this.value+'°')"><span class="range-val" id="m-bsTextRotate-val">0°</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bs-panel">
+            <div class="bs-acc-header collapsed" onclick="toggleAcc(this)">Text Layer 2</div>
+            <div class="bs-acc-body collapsed">
+              <div class="mc-section">
+                <div class="modal-toggle-grid"><div class="modal-tog"><span>Show</span><input type="checkbox" id="m-bs2ShowText" onchange="mOv('bs2ShowText',this.checked)"></div></div>
+                <label>Text (| = line break)</label>
+                <input type="text" id="m-bs2Text" oninput="mOv('bs2Text',this.value)">
+                <label>Font</label>
+                <select id="m-bs2Font" onchange="mOv('bs2Font',this.value)">
+                  <option value="Barlow">Barlow</option><option value="Oswald">Oswald</option><option value="Montserrat">Montserrat</option><option value="Raleway">Raleway</option><option value="Playfair Display">Playfair Display</option><option value="Dancing Script">Dancing Script</option><option value="Bebas Neue">Bebas Neue</option><option value="Pacifico">Pacifico</option>
+                </select>
+                <div class="color-row"><input type="color" id="m-bs2TextColor" value="#ffffff" oninput="mOv('bs2TextColor',this.value)"><label>Color</label></div>
+                <label>Size</label>
+                <div class="range-row"><input type="range" id="m-bs2TextSize" min="10" max="120" value="32" step="1" oninput="mOv('bs2TextSize',+this.value);mtxt('m-bs2TextSize-val',this.value+'px')"><span class="range-val" id="m-bs2TextSize-val">32px</span></div>
+                <div class="modal-toggle-grid">
+                  <div class="modal-tog"><span>Bold</span><input type="checkbox" id="m-bs2TextBold" onchange="mOv('bs2TextBold',this.checked)"></div>
+                  <div class="modal-tog"><span>Italic</span><input type="checkbox" id="m-bs2TextItalic" onchange="mOv('bs2TextItalic',this.checked)"></div>
+                </div>
+                <label>Alignment</label>
+                <select id="m-bs2TextAlign" onchange="mOv('bs2TextAlign',this.value)"><option value="center">Center</option><option value="left">Left</option><option value="right">Right</option></select>
+                <label>Vertical position</label>
+                <div class="range-row"><input type="range" id="m-bs2TextY" min="-45" max="45" value="20" step="1" oninput="mOv('bs2TextY',+this.value);mtxt('m-bs2TextY-val',(+this.value>0?'+':'')+this.value+'%')"><span class="range-val" id="m-bs2TextY-val">+20%</span></div>
+                <label>Rotation</label>
+                <div class="range-row"><input type="range" id="m-bs2TextRotate" min="-180" max="180" value="0" step="1" oninput="mOv('bs2TextRotate',+this.value);mtxt('m-bs2TextRotate-val',this.value+'°')"><span class="range-val" id="m-bs2TextRotate-val">0°</span></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn-done" onclick="closeModal()">Done</button>
+      <button class="modal-btn-export" id="modal-export-btn">↓ Export This Size</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+// ─── SUPABASE CONFIG ─────────────────────────────────────────────────────────
+// Get these from: supabase.com → your project → Settings → API
+const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+const SUPABASE_KEY = 'YOUR_ANON_PUBLIC_KEY';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let currentUser = null;
+
+async function sendMagicLink() {
+  const emailEl = document.getElementById('auth-email-input');
+  const btn     = document.getElementById('auth-submit-btn');
+  const msg     = document.getElementById('auth-msg');
+  const email   = emailEl.value.trim();
+  if (!email) { emailEl.focus(); return; }
+  btn.disabled = true; btn.textContent = 'Sending…';
+  const { error } = await sb.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: window.location.origin + window.location.pathname }
+  });
+  if (error) {
+    msg.textContent = error.message; msg.style.color = '#c44';
+    btn.disabled = false; btn.textContent = 'Send Magic Link';
+  } else {
+    msg.textContent = 'Check your email for the sign-in link!';
+    msg.style.color = '#ae8d4d'; btn.textContent = 'Link sent ✓';
+  }
+}
+
+async function signOut() {
+  await sb.auth.signOut();
+}
+
+async function uploadToStorage(file) {
+  const ext  = file.name.split('.').pop().toLowerCase();
+  const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const { error } = await sb.storage.from('ad-images').upload(path, file, { cacheControl: '3600', upsert: false });
+  if (error) throw error;
+  return sb.storage.from('ad-images').getPublicUrl(path).data.publicUrl;
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+const LOGO_SRC = 'logo-color.png';
+const LOGO_COLOR_SRC = 'logo-color.png';
+let LOGO_INVERTED_SRC = null;
+
+function prepareInvertedLogo() {
+  const img = new Image();
+  img.onload = () => {
+    const c = document.createElement('canvas');
+    c.width = img.naturalWidth || img.width;
+    c.height = img.naturalHeight || img.height;
+    const ctx = c.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    const data = ctx.getImageData(0, 0, c.width, c.height);
+    const d = data.data;
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i + 3] !== 0) {
+        d[i] = 255;
+        d[i + 1] = 255;
+        d[i + 2] = 255;
+      }
+    }
+    ctx.putImageData(data, 0, 0);
+    try { LOGO_INVERTED_SRC = c.toDataURL('image/png'); } catch (e) { LOGO_INVERTED_SRC = null; }
+  };
+  img.src = LOGO_COLOR_SRC;
+}
+const FORMATS = [
+  { id:'ig-square',    label:'Instagram / FB Post',       sub:'1080 × 1080', w:1080, h:1080, aspect:1,        preview:220 },
+  { id:'fb-carousel',  label:'FB Carousel',                sub:'600 × 600',   w:600,  h:600,  aspect:1,        preview:200 },
+  { id:'fb-dynamic',   label:'FB Dynamic Ad',              sub:'500 × 500',   w:500,  h:500,  aspect:1,        preview:180 },
+  { id:'fb-lead',      label:'FB Lead / Link / Messenger', sub:'1200 × 628',  w:1200, h:628,  aspect:1200/628, preview:240 },
+  { id:'fb-messenger', label:'FB Messenger Ad',            sub:'254 × 133',   w:254,  h:133,  aspect:254/133,  preview:220 },
+  { id:'fb-stories',   label:'FB / IG Stories',            sub:'1080 × 1920', w:1080, h:1920, aspect:9/16,     preview:240 },
+];
+
+const overrides = {};
+FORMATS.forEach(f => { overrides[f.id] = {}; });
+let photoUrl = null;
+let blankSlateBgUrl = null;
+let bs2ImageUrl = null;
+
+function getGlobal() {
+  return {
+    photoUrl,
+    photoY:        +document.getElementById('photoY').value,
+    photoScale:    +document.getElementById('photoScale').value,
+    overlayDark:   +document.getElementById('overlayDark').value,
+    eyebrow:       document.getElementById('eyebrow').value,
+    headline:      document.getElementById('headline').value,
+    headlineStyle: document.getElementById('headlineStyle').value,
+    headlineSize:  +document.getElementById('headlineSize').value,
+    services:      [...document.querySelectorAll('#services-grid input:checked')].map(c=>c.dataset.svc),
+    ctaText:       document.getElementById('ctaText').value,
+    showCta:       document.getElementById('showCta').checked,
+    showCorners:   document.getElementById('showCorners').checked,
+    showDivider:   document.getElementById('showDivider').checked,
+    showLogo:      document.getElementById('showLogo').checked,
+    logoWhite:     document.getElementById('logoWhite').checked,
+    blankSlateBgUrl,
+    bs2ImageUrl,
+    accent:        document.getElementById('accentColor').value,
+    layoutStyle:   currentStyle,
+    contentScale:  +document.getElementById('contentScale').value / 100,
+    overlayMode:   currentOverlayMode,
+    bsShowText:    document.getElementById('bsShowText').checked,
+    bsText:        document.getElementById('bsText').value,
+    bsFont:        document.getElementById('bsFont').value,
+    bsTextColor:   document.getElementById('bsTextColor').value,
+    bsTextSize:    +document.getElementById('bsTextSize').value,
+    bsTextBold:    document.getElementById('bsTextBold').checked,
+    bsTextItalic:  document.getElementById('bsTextItalic').checked,
+    bsTextAlign:   document.getElementById('bsTextAlign').value,
+    bsTextY:       +document.getElementById('bsTextY').value,
+    bsTextRotate:  +document.getElementById('bsTextRotate').value,
+    bsBgColor:     document.getElementById('bsBgColor').value,
+    bs2ShowText:   document.getElementById('bs2ShowText').checked,
+    bs2Text:       document.getElementById('bs2Text').value,
+    bs2Font:       document.getElementById('bs2Font').value,
+    bs2TextColor:  document.getElementById('bs2TextColor').value,
+    bs2TextSize:   +document.getElementById('bs2TextSize').value,
+    bs2TextBold:   document.getElementById('bs2TextBold').checked,
+    bs2TextItalic: document.getElementById('bs2TextItalic').checked,
+    bs2TextAlign:  document.getElementById('bs2TextAlign').value,
+    bs2TextY:      +document.getElementById('bs2TextY').value,
+    bs2TextRotate: +document.getElementById('bs2TextRotate').value,
+    bs2ImgShow:    document.getElementById('bs2ImgShow').checked,
+    bs2ImgScale:   +document.getElementById('bs2ImgScale').value,
+    bs2ImgY:       +document.getElementById('bs2ImgY').value,
+    bs2ImgX:       +document.getElementById('bs2ImgX').value,
+  };
+}
+
+function mergeState(fmtId) {
+  const g = getGlobal();
+  const ov = overrides[fmtId] || {};
+  const m = {};
+  ['photoUrl','blankSlateBgUrl','bs2ImageUrl','accent'].forEach(k => m[k] = g[k]);
+  // services: use override if it has items, else global
+  m.services = (ov.services && ov.services.length > 0) ? ov.services : g.services;
+  ['photoY','photoScale','overlayDark','headlineSize','eyebrow','headline','headlineStyle',
+   'ctaText','showCta','showCorners','showDivider','showLogo','logoWhite',
+   'contentY','logoSize','logoY','showEyebrow',
+   'eyebrowSize','svcSize','ctaSize','layoutStyle','contentScale','overlayMode',
+   'bsShowText','bsText','bsFont','bsTextColor','bsTextSize','bsTextBold','bsTextItalic','bsTextAlign','bsTextY','bsBgColor','bsTextRotate',
+   'bs2ShowText','bs2Text','bs2Font','bs2TextColor','bs2TextSize','bs2TextBold','bs2TextItalic','bs2TextAlign','bs2TextY','bs2TextRotate',
+   'bs2ImgShow','bs2ImgScale','bs2ImgY','bs2ImgX'
+  ].forEach(k => {
+    m[k] = ov[k] !== undefined ? ov[k] : g[k];
+  });
+  if (m.contentY === undefined) m.contentY = 0;
+  if (m.logoSize === undefined) m.logoSize = 34;
+  if (m.logoY === undefined) m.logoY = 4;
+  if (m.showEyebrow === undefined) m.showEyebrow = true;
+  if (m.eyebrowSize === undefined) m.eyebrowSize = 9;
+  if (m.svcSize === undefined) m.svcSize = 10;
+  if (m.ctaSize === undefined) m.ctaSize = 9;
+  if (m.contentScale === undefined) m.contentScale = 1;
+  if (m.photoScale === undefined) m.photoScale = 100;
+  if (m.showLogo === undefined) m.showLogo = true;
+  if (m.logoWhite === undefined) m.logoWhite = false;
+  if (m.overlayMode === undefined) m.overlayMode = 'light';
+  if (m.bsShowText === undefined) m.bsShowText = true;
+  if (!m.bsText) m.bsText = 'Your text here';
+  if (!m.bsFont) m.bsFont = 'Barlow';
+  if (!m.bsTextColor) m.bsTextColor = '#ffffff';
+  if (m.bsTextSize === undefined) m.bsTextSize = 54;
+  if (m.bsTextBold === undefined) m.bsTextBold = true;
+  if (m.bsTextItalic === undefined) m.bsTextItalic = false;
+  if (!m.bsTextAlign) m.bsTextAlign = 'center';
+  if (m.bsTextY === undefined) m.bsTextY = 0;
+  if (!m.bsBgColor) m.bsBgColor = '#cc2222';
+  if (m.bs2ShowText === undefined) m.bs2ShowText = false;
+  if (m.bs2Text === undefined) m.bs2Text = '';
+  if (!m.bs2Font) m.bs2Font = 'Barlow';
+  if (!m.bs2TextColor) m.bs2TextColor = '#ffffff';
+  if (m.bs2TextSize === undefined) m.bs2TextSize = 32;
+  if (m.bs2TextBold === undefined) m.bs2TextBold = false;
+  if (m.bs2TextItalic === undefined) m.bs2TextItalic = false;
+  if (!m.bs2TextAlign) m.bs2TextAlign = 'center';
+  if (m.bs2TextY === undefined) m.bs2TextY = 20;
+  if (m.bsTextRotate === undefined) m.bsTextRotate = 0;
+  if (m.bs2TextRotate === undefined) m.bs2TextRotate = 0;
+  if (m.bs2ImgShow === undefined) m.bs2ImgShow = false;
+  if (m.bs2ImgScale === undefined) m.bs2ImgScale = 60;
+  if (m.bs2ImgY === undefined) m.bs2ImgY = 0;
+  if (m.bs2ImgX === undefined) m.bs2ImgX = 0;
+  return m;
+}
+
+function buildTint(dark, style, overlayMode) {
+  const base = dark / 100;
+  const isLight = overlayMode === 'light';
+
+  if (style === 'dark') {
+    if (isLight) {
+      // Very pale warm wash — photo dominates, just a faint darkening at bottom for text legibility
+      return `linear-gradient(to bottom,rgba(10,22,40,0.05) 0%,rgba(10,22,40,0.0) 40%,rgba(8,14,28,${(base*0.35).toFixed(2)}) 65%,rgba(6,10,22,${(base*0.75).toFixed(2)}) 100%)`;
+    }
+    return `linear-gradient(to bottom,rgba(10,22,40,${Math.max(0,base-0.25).toFixed(2)}) 0%,rgba(10,22,40,${Math.max(0,base-0.35).toFixed(2)}) 35%,rgba(10,22,40,${Math.min(base+0.05,1).toFixed(2)}) 60%,rgba(8,16,32,${Math.min(base+0.35,1).toFixed(2)}) 100%)`;
+  }
+
+  if (style === 'light') {
+    if (isLight) {
+      // Barely-there warm cream wash — photo breathes fully
+      return `linear-gradient(to bottom,rgba(255,252,245,0.08) 0%,rgba(255,252,245,0.0) 40%,rgba(20,16,8,${(base*0.3).toFixed(2)}) 70%,rgba(10,8,4,${(base*0.6).toFixed(2)}) 100%)`;
+    }
+    return `linear-gradient(to bottom,rgba(240,235,224,${Math.max(0,base-0.3).toFixed(2)}) 0%,rgba(240,235,224,${Math.max(0,base-0.4).toFixed(2)}) 30%,rgba(20,18,12,${Math.min(base,0.65).toFixed(2)}) 70%,rgba(10,9,6,${Math.min(base+0.2,0.88).toFixed(2)}) 100%)`;
+  }
+
+  if (style === 'bold') {
+    if (isLight) {
+      // Light charcoal fade at bottom only — photo clear in center
+      return `linear-gradient(to bottom,rgba(15,15,25,0.08) 0%,rgba(15,15,25,0.0) 35%,rgba(15,15,25,${(base*0.3).toFixed(2)}) 60%,rgba(15,15,25,${(base*0.8).toFixed(2)}) 100%)`;
+    }
+    return `linear-gradient(to bottom,rgba(15,15,25,${Math.min(base+0.15,0.95).toFixed(2)}) 0%,rgba(15,15,25,${Math.max(0,base-0.3).toFixed(2)}) 30%,rgba(15,15,25,${Math.max(0,base-0.2).toFixed(2)}) 60%,rgba(15,15,25,${Math.min(base+0.3,0.98).toFixed(2)}) 100%)`;
+  }
+
+  return `linear-gradient(to bottom,rgba(10,22,40,0) 0%,rgba(10,22,40,0) 100%)`;
+}
+
+function buildPost(fmt, s, containerW) {
+  const scale = containerW / fmt.w;
+  const cs = scale * (s.contentScale || 1);  // content scale = layout scale × user multiplier
+  const W = containerW;
+  const H = Math.round(fmt.h * scale);
+  const acc = s.accent;
+  const style = s.layoutStyle || 'dark';
+  const isLight = (s.overlayMode || 'light') === 'light';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'post-canvas-wrap';
+  wrap.style.cssText = `width:${W}px;height:${H}px;position:relative;overflow:hidden;flex-shrink:0;font-family:'Barlow',sans-serif;`;
+
+  // Background photo
+  const bg = document.createElement('div');
+  bg.className = 'photo-bg-layer';
+  bg.style.backgroundPosition = `center ${s.photoY}%`;
+  bg.style.transformOrigin = 'center center';
+  bg.style.transform = `scale(${(s.photoScale||100)/100})`;
+  if (s.photoUrl) bg.style.backgroundImage = `url(${s.photoUrl})`;
+  else bg.style.background = style === 'light' ? '#d8cfc0' : style === 'bold' ? '#1a1a2e' : style === 'blank-slate' ? '#cc2222' : '#0e1e36';
+  wrap.appendChild(bg);
+
+  // Tint overlay
+  const tint = document.createElement('div');
+  tint.className = 'tint-layer';
+  tint.style.background = buildTint(s.overlayDark, style, s.overlayMode||'light');
+  wrap.appendChild(tint);
+
+  if (style === 'dark') {
+    // ── STYLE 1: Dark & Refined ──
+    // Light mode: ivory/cream text on bright photo; Dark mode: white text on moody navy
+    const headlineColor = isLight ? '#1a120a' : '#f5eedf';
+    const eyebrowColor  = isLight ? acc : acc;
+    const svcColor      = isLight ? 'rgba(20,12,4,0.75)' : '#c8b98a';
+    const ctaTextColor  = isLight ? '#ffffff' : '#0b1928';
+    const ctaBg         = isLight ? '#0e1e36' : acc;
+
+    if (s.showCorners) {
+      const cSz = Math.round(56*cs), pad = Math.round(16*cs);
+      const inset = Math.round(cSz * (7/56));
+      const lineLen = Math.round(cSz * (42/56));
+      const lineW = Math.max(1, Math.round(1.2*cs));
+      const dotR = Math.max(1, Math.round(cSz * (2/56)));
+      [{p:`top:${pad}px;left:${pad}px;`},{p:`top:${pad}px;right:${pad}px;transform:scaleX(-1);`},
+       {p:`bottom:${pad}px;left:${pad}px;transform:scaleY(-1);`},{p:`bottom:${pad}px;right:${pad}px;transform:scale(-1,-1);`}
+      ].forEach(c => {
+        const corner = document.createElement('div');
+        corner.style.cssText = `position:absolute;width:${cSz}px;height:${cSz}px;pointer-events:none;${c.p}`;
+        const vLine = document.createElement('div');
+        vLine.style.cssText = `position:absolute;left:${inset}px;top:${inset}px;width:${lineW}px;height:${lineLen}px;background:${acc};opacity:0.7;`;
+        const hLine = document.createElement('div');
+        hLine.style.cssText = `position:absolute;left:${inset}px;top:${inset}px;width:${lineLen}px;height:${lineW}px;background:${acc};opacity:0.7;`;
+        const dot = document.createElement('div');
+        dot.style.cssText = `position:absolute;left:${inset - dotR}px;top:${inset - dotR}px;width:${dotR*2}px;height:${dotR*2}px;background:${acc};border-radius:50%;opacity:0.8;`;
+        corner.appendChild(vLine);
+        corner.appendChild(hLine);
+        corner.appendChild(dot);
+        wrap.appendChild(corner);
+      });
+    }
+
+    // Logo: white in dark mode, color in light mode
+    const logoH = Math.max(10, Math.round((s.logoSize||34)*cs));
+    const logoTop = Math.round(((s.logoY||4)/100)*H);
+    if (s.showLogo !== false) {
+    const logoWrap = document.createElement('div');
+    logoWrap.style.cssText = `position:absolute;top:${logoTop}px;left:50%;transform:translateX(-50%);pointer-events:none;`;
+    const logoImg = document.createElement('img');
+    logoImg.src = s.logoWhite ? (LOGO_INVERTED_SRC || LOGO_COLOR_SRC) : LOGO_COLOR_SRC;
+    logoImg.style.cssText = `height:${logoH}px;width:auto;display:block;opacity:0.95;`;
+    logoWrap.appendChild(logoImg); wrap.appendChild(logoWrap);
+    }
+
+    const contentYPct = s.contentY||0;
+    const padB = Math.round(28*cs), padS = Math.round(32*cs);
+    const content = document.createElement('div');
+    content.className = 'content-layer';
+    content.style.cssText = `position:absolute;bottom:${contentYPct}%;left:0;right:0;padding:0 ${padS}px ${padB}px;text-align:center;pointer-events:none;`;
+
+    if (s.showEyebrow !== false) {
+      const eEl = document.createElement('span');
+      eEl.style.cssText = `display:block;font-weight:300;font-size:${Math.max(6,Math.round((s.eyebrowSize||9)*cs))}px;letter-spacing:0.3em;text-transform:uppercase;color:${eyebrowColor};margin-bottom:${Math.round(8*cs)}px;`;
+      eEl.textContent = s.eyebrow; content.appendChild(eEl);
+    }
+
+    const hlFs = Math.max(10,Math.round(s.headlineSize*cs));
+    const hlEl = document.createElement('div');
+    hlEl.style.cssText = `font-family:'Playfair Display',serif;font-size:${hlFs}px;font-weight:400;color:${headlineColor};line-height:1.15;margin-bottom:${Math.round(10*cs)}px;`;
+    const parts = s.headline.split('|').map(p=>p.trim());
+    if (s.headlineStyle==='italic') hlEl.innerHTML = parts.map(p=>`<span style="display:block;font-style:italic;font-weight:400;">${p}</span>`).join('');
+    else if (s.headlineStyle==='normal') hlEl.innerHTML = parts.map(p=>`<span style="display:block;font-style:normal;font-weight:400;">${p}</span>`).join('');
+    else hlEl.innerHTML = parts.map((p,i)=>i===0?`<span style="display:block;font-style:italic;font-weight:400;">${p}</span>`:`<span style="display:block;font-style:normal;font-weight:600;color:${isLight?'#0a0800':'#fff'};">${p}</span>`).join('');
+    content.appendChild(hlEl);
+
+    const svcFs=Math.max(6,Math.round((s.svcSize||10)*cs)), dotSz=Math.max(2,Math.round(3*cs)), dotMx=Math.round(8*cs);
+    const svcRow=document.createElement('div');
+    svcRow.style.cssText=`display:flex;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:${Math.round(14*cs)}px;`;
+    s.services.forEach((name,i)=>{
+      const sp=document.createElement('span'); sp.style.cssText=`font-size:${svcFs}px;font-weight:400;letter-spacing:0.18em;text-transform:uppercase;color:${svcColor};`; sp.textContent=name; svcRow.appendChild(sp);
+      if(i<s.services.length-1){const d=document.createElement('div');d.style.cssText=`width:${dotSz}px;height:${dotSz}px;background:${acc};border-radius:50%;opacity:0.8;margin:0 ${dotMx}px;flex-shrink:0;`;svcRow.appendChild(d);}
+    });
+    content.appendChild(svcRow);
+
+    if (s.showDivider) {
+      const dw=Math.round(40*cs),ds=Math.max(3,Math.round(4*cs));
+      const lineH=Math.max(1,Math.round(1*cs));
+      const dr=document.createElement('div'); dr.style.cssText=`display:flex;align-items:center;justify-content:center;gap:${Math.round(8*cs)}px;margin-bottom:${Math.round(12*cs)}px;`;
+      dr.innerHTML=`<div style="width:${dw}px;height:${lineH}px;background:${acc};opacity:0.5;"></div><div style="width:${ds}px;height:${ds}px;background:${acc};transform:rotate(45deg);opacity:0.8;"></div><div style="width:${dw}px;height:${lineH}px;background:${acc};opacity:0.5;"></div>`;
+      content.appendChild(dr);
+    }
+
+    if (s.showCta) {
+      const ctaEl=document.createElement('div');
+      ctaEl.style.cssText=`display:inline-block;font-size:${Math.max(6,Math.round((s.ctaSize||9)*cs))}px;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;color:${ctaTextColor};background:${ctaBg};padding:${Math.round(8*cs)}px ${Math.round(20*cs)}px;`;
+      ctaEl.textContent=s.ctaText; content.appendChild(ctaEl);
+    }
+    wrap.appendChild(content);
+
+  } else if (style === 'light') {
+    // ── STYLE 2: Natural & Light (Adirondacks) ──
+    const headlineColor = isLight ? '#1a1208' : '#ffffff';
+    const eyebrowColor  = isLight ? 'rgba(30,20,8,0.7)' : 'rgba(255,255,255,0.75)';
+    const svcColor      = isLight ? 'rgba(30,20,8,0.65)' : 'rgba(255,255,255,0.8)';
+    const sepColor      = '#c8a96e';
+    const ctaBg         = isLight ? '#1a1208' : '#c8a96e';
+    const ctaTextColor  = isLight ? '#f5ece0' : '#1a1208';
+
+    const logoH = Math.max(10, Math.round((s.logoSize||36)*cs));
+    const logoTop = Math.round(((s.logoY||5)/100)*H);
+    if (s.showLogo !== false) {
+    const logoWrap = document.createElement('div');
+    logoWrap.style.cssText = `position:absolute;top:${logoTop}px;left:50%;transform:translateX(-50%);pointer-events:none;`;
+    const logoImg = document.createElement('img');
+    logoImg.src = s.logoWhite ? (LOGO_INVERTED_SRC || LOGO_COLOR_SRC) : LOGO_COLOR_SRC;
+    logoImg.style.cssText = `height:${logoH}px;width:auto;display:block;opacity:0.9;`;
+    logoWrap.appendChild(logoImg); wrap.appendChild(logoWrap);
+    }
+
+    const contentYPct = s.contentY || 0;
+    const centerTop = Math.round(H * 0.2) + Math.round(contentYPct/100 * H);
+    const padS = Math.round(28*cs);
+    const content = document.createElement('div');
+    content.style.cssText = `position:absolute;top:${centerTop}px;left:0;right:0;padding:0 ${padS}px;text-align:center;pointer-events:none;`;
+
+    if (s.showEyebrow !== false) {
+      const eEl = document.createElement('span');
+      eEl.style.cssText = `display:block;font-weight:400;font-size:${Math.max(6,Math.round((s.eyebrowSize||8)*cs))}px;letter-spacing:0.22em;text-transform:uppercase;color:${eyebrowColor};margin-bottom:${Math.round(6*cs)}px;`;
+      eEl.textContent = s.eyebrow; content.appendChild(eEl);
+    }
+
+    const hlFs = Math.max(10, Math.round(s.headlineSize*cs));
+    const hlEl = document.createElement('div');
+    hlEl.style.cssText = `font-family:'Playfair Display',serif;font-size:${hlFs}px;font-weight:600;color:${headlineColor};line-height:1.1;margin-bottom:${Math.round(12*cs)}px;${isLight ? '' : `text-shadow:0 2px ${Math.round(12*cs)}px rgba(0,0,0,0.4);`}`;
+    const parts = s.headline.split('|').map(p=>p.trim());
+    hlEl.innerHTML = parts.map(p=>`<span style="display:block;">${p}</span>`).join('');
+    content.appendChild(hlEl);
+
+    const sep = document.createElement('div');
+    const sepH = Math.max(1, Math.round(2*cs));
+    sep.style.cssText = `width:${Math.round(40*cs)}px;height:${sepH}px;background:${sepColor};margin:0 auto ${Math.round(12*cs)}px;opacity:0.9;`;
+    content.appendChild(sep);
+
+    const svcFs=Math.max(5,Math.round((s.svcSize||9)*cs));
+    const svcRow=document.createElement('div');
+    svcRow.style.cssText=`display:flex;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:${Math.round(14*cs)}px;`;
+    s.services.forEach((name,i)=>{
+      const sp=document.createElement('span'); sp.style.cssText=`font-size:${svcFs}px;font-weight:300;letter-spacing:0.15em;text-transform:uppercase;color:${svcColor};`; sp.textContent=name; svcRow.appendChild(sp);
+      if(i<s.services.length-1){const d=document.createElement('div');d.style.cssText=`width:${Math.max(2,Math.round(3*cs))}px;height:${Math.max(2,Math.round(3*cs))}px;background:${sepColor};border-radius:50%;margin:0 ${Math.round(8*cs)}px;flex-shrink:0;`;svcRow.appendChild(d);}
+    });
+    content.appendChild(svcRow);
+
+    if (s.showCta) {
+      const ctaEl=document.createElement('div');
+      ctaEl.style.cssText=`display:inline-block;font-size:${Math.max(6,Math.round((s.ctaSize||9)*cs))}px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:${ctaTextColor};background:${ctaBg};padding:${Math.round(9*cs)}px ${Math.round(22*cs)}px;border-radius:${Math.round(3*cs)}px;`;
+      ctaEl.textContent=s.ctaText; content.appendChild(ctaEl);
+    }
+    wrap.appendChild(content);
+
+  } else if (style === 'bold') {
+    // ── STYLE 3: Bold & Modern (main site) ──
+    const red = '#cc2222';
+    const headlineColor = isLight ? '#ffffff' : '#ffffff';
+    const eyebrowColor  = isLight ? 'rgba(255,255,255,0.9)' : red;
+    const svcColor      = isLight ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.6)';
+    const ctaBg         = red;
+    const barOpacity    = isLight ? '0.7' : '0.9';
+
+    const bar = document.createElement('div');
+    bar.style.cssText = `position:absolute;top:0;left:0;width:${Math.max(3,Math.round(8*cs))}px;height:100%;background:${red};opacity:${barOpacity};`;
+    wrap.appendChild(bar);
+
+    const logoH = Math.max(10, Math.round((s.logoSize||28)*cs));
+    const logoPad = Math.round(22*cs);
+    if (s.showLogo !== false) {
+    const logoWrap = document.createElement('div');
+    logoWrap.style.cssText = `position:absolute;top:${logoPad}px;left:${logoPad + Math.max(3,Math.round(8*cs)) + Math.round(8*cs)}px;pointer-events:none;`;
+    const logoImg = document.createElement('img');
+    logoImg.src = s.logoWhite ? (LOGO_INVERTED_SRC || LOGO_COLOR_SRC) : LOGO_COLOR_SRC;
+    logoImg.style.cssText = `height:${logoH}px;width:auto;display:block;opacity:0.95;`;
+    logoWrap.appendChild(logoImg); wrap.appendChild(logoWrap);
+    }
+
+    const contentYPct = s.contentY || 0;
+    const padL = Math.round(22*cs) + Math.max(3,Math.round(8*cs)) + Math.round(14*cs);
+    const padR = Math.round(22*cs);
+    const contentTop = Math.round(H * 0.28) + Math.round(contentYPct/100 * H);
+    const content = document.createElement('div');
+    content.style.cssText = `position:absolute;top:${contentTop}px;left:${padL}px;right:${padR}px;pointer-events:none;`;
+
+    if (s.showEyebrow !== false) {
+      const eEl = document.createElement('div');
+      eEl.style.cssText = `font-size:${Math.max(6,Math.round((s.eyebrowSize||8)*cs))}px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:${eyebrowColor};margin-bottom:${Math.round(7*cs)}px;`;
+      eEl.textContent = s.eyebrow; content.appendChild(eEl);
+    }
+
+    const hlFs = Math.max(10, Math.round(s.headlineSize*cs));
+    const hlEl = document.createElement('div');
+    hlEl.style.cssText = `font-family:'Barlow',sans-serif;font-size:${hlFs}px;font-weight:700;color:${headlineColor};line-height:1.05;margin-bottom:${Math.round(14*cs)}px;letter-spacing:-0.01em;`;
+    const parts = s.headline.split('|').map(p=>p.trim());
+    hlEl.innerHTML = parts.map(p=>`<span style="display:block;">${p}</span>`).join('');
+    content.appendChild(hlEl);
+
+    const svcFs = Math.max(6, Math.round((s.svcSize||8)*cs));
+    const svcRow = document.createElement('div');
+    svcRow.style.cssText = `display:flex;align-items:center;flex-wrap:wrap;margin-bottom:${Math.round(16*cs)}px;`;
+    s.services.forEach((name,i) => {
+      const sp = document.createElement('span');
+      sp.style.cssText = `font-size:${svcFs}px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:${svcColor};`;
+      sp.textContent = name; svcRow.appendChild(sp);
+      if (i < s.services.length-1) {
+        const d = document.createElement('span');
+        d.style.cssText = `color:${red};margin:0 ${Math.round(7*cs)}px;font-size:${svcFs}px;`;
+        d.textContent = '|'; svcRow.appendChild(d);
+      }
+    });
+    content.appendChild(svcRow);
+
+    if (s.showCta) {
+      const ctaEl = document.createElement('div');
+      ctaEl.style.cssText = `display:inline-block;font-family:'Barlow',sans-serif;font-size:${Math.max(6,Math.round((s.ctaSize||9)*cs))}px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#ffffff;background:${ctaBg};padding:${Math.round(10*cs)}px ${Math.round(22*cs)}px;border-radius:${Math.round(2*cs)}px;`;
+      ctaEl.textContent = s.ctaText; content.appendChild(ctaEl);
+    }
+    wrap.appendChild(content);
+
+  } else if (style === 'blank-slate') {
+    // ── STYLE 4: Blank Slate ──
+    // Background image (or solid red), centered subject photo, logo top-right
+
+    // Background — use blank slate bg image if uploaded, otherwise solid red
+    if (s.blankSlateBgUrl) {
+      bg.style.backgroundImage = `url(${s.blankSlateBgUrl})`;
+      bg.style.backgroundSize = 'cover';
+      bg.style.backgroundPosition = 'center';
+      bg.style.transform = 'none';
+    } else {
+      bg.style.backgroundImage = 'none';
+      bg.style.background = s.bsBgColor || '#cc2222';
+      bg.style.transform = 'none';
+    }
+    tint.style.background = 'transparent';
+
+    // Logo — top-right, always white on red
+    const logoH = Math.max(10, Math.round((s.logoSize||28)*cs));
+    const logoPad = Math.round(16*cs);
+    if (s.showLogo !== false) {
+    const logoWrap = document.createElement('div');
+    logoWrap.style.cssText = `position:absolute;top:${logoPad}px;right:${logoPad}px;pointer-events:none;z-index:20;`;
+    const logoImg = document.createElement('img');
+    logoImg.src = s.logoWhite ? (LOGO_INVERTED_SRC || LOGO_COLOR_SRC) : LOGO_COLOR_SRC;
+    logoImg.style.cssText = `height:${logoH}px;width:auto;display:block;`;
+    logoWrap.appendChild(logoImg);
+    wrap.appendChild(logoWrap);
+    }
+
+    // Photo — natural aspect ratio, centered, no frame, no caption
+    if (s.photoUrl) {
+      const imgEl = document.createElement('img');
+      imgEl.src = s.photoUrl;
+      const pScale = (s.photoScale || 100) / 100;
+      const maxW = Math.round(W * 0.78 * pScale);
+      const maxH = Math.round(H * 0.78 * pScale);
+      const vertShift = Math.round((s.contentY||0) / 100 * H);
+      imgEl.style.cssText = `position:absolute;max-width:${maxW}px;max-height:${maxH}px;`+
+        `width:auto;height:auto;object-fit:contain;z-index:10;`+
+        `left:50%;top:50%;transform:translate(-50%,calc(-50% + ${vertShift}px));`+
+        `box-shadow:0 ${Math.round(8*scale)}px ${Math.round(32*scale)}px rgba(0,0,0,0.5);`;
+      wrap.appendChild(imgEl);
+    }
+
+    // Image Layer 2
+    if (s.bs2ImgShow && s.bs2ImageUrl) {
+      const img2 = document.createElement('img');
+      img2.src = s.bs2ImageUrl;
+      const i2Scale = (s.bs2ImgScale || 60) / 100;
+      const i2MaxW = Math.round(W * 0.78 * i2Scale);
+      const i2MaxH = Math.round(H * 0.78 * i2Scale);
+      const i2Y = Math.round((s.bs2ImgY || 0) / 100 * H);
+      const i2X = Math.round((s.bs2ImgX || 0) / 100 * W);
+      img2.style.cssText = `position:absolute;max-width:${i2MaxW}px;max-height:${i2MaxH}px;`+
+        `width:auto;height:auto;object-fit:contain;z-index:11;`+
+        `left:50%;top:50%;transform:translate(calc(-50% + ${i2X}px),calc(-50% + ${i2Y}px));`+
+        `box-shadow:0 ${Math.round(6*scale)}px ${Math.round(24*scale)}px rgba(0,0,0,0.4);`;
+      wrap.appendChild(img2);
+    }
+
+    // Shared font map for both text layers
+    const bsFontMap = {
+      'Barlow':           "'Barlow', sans-serif",
+      'Oswald':           "'Oswald', sans-serif",
+      'Montserrat':       "'Montserrat', sans-serif",
+      'Raleway':          "'Raleway', sans-serif",
+      'Playfair Display': "'Playfair Display', serif",
+      'Dancing Script':   "'Dancing Script', cursive",
+      'Bebas Neue':       "'Bebas Neue', cursive",
+      'Pacifico':         "'Pacifico', cursive",
+    };
+
+    function renderBsTextLayer(text, font, color, size, bold, italic, align, yPct, rotate, zIdx) {
+      const fontFamily = bsFontMap[font] || "'Barlow', sans-serif";
+      const txtWrap = document.createElement('div');
+      const txtY = Math.round((yPct || 0) / 100 * H);
+      const txtPad = Math.round(W * 0.08);
+      txtWrap.style.cssText =
+        `position:absolute;left:0;right:0;z-index:${zIdx};`+
+        `top:50%;transform:translateY(calc(-50% + ${txtY}px)) rotate(${rotate||0}deg);`+
+        `text-align:${align || 'center'};padding:0 ${txtPad}px;pointer-events:none;`;
+      const textLines = text.split('|').map(p => p.trim());
+      const fontSize = Math.max(10, Math.round(size * cs));
+      textLines.forEach(line => {
+        if (!line) return;
+        const lineEl = document.createElement('div');
+        lineEl.style.cssText =
+          `font-family:${fontFamily};`+
+          `font-size:${fontSize}px;`+
+          `font-weight:${bold ? '700' : '400'};`+
+          `font-style:${italic ? 'italic' : 'normal'};`+
+          `color:${color || '#ffffff'};`+
+          `line-height:1.15;`+
+          `text-shadow:0 2px 16px rgba(0,0,0,0.45);`;
+        lineEl.textContent = line;
+        txtWrap.appendChild(lineEl);
+      });
+      return txtWrap;
+    }
+
+    // Text layer 1
+    if (s.bsShowText !== false && s.bsText) {
+      wrap.appendChild(renderBsTextLayer(
+        s.bsText, s.bsFont, s.bsTextColor, s.bsTextSize || 54,
+        s.bsTextBold, s.bsTextItalic, s.bsTextAlign, s.bsTextY, s.bsTextRotate||0, 15
+      ));
+    }
+
+    // Text layer 2
+    if (s.bs2ShowText && s.bs2Text) {
+      wrap.appendChild(renderBsTextLayer(
+        s.bs2Text, s.bs2Font, s.bs2TextColor, s.bs2TextSize || 32,
+        s.bs2TextBold, s.bs2TextItalic, s.bs2TextAlign, s.bs2TextY, s.bs2TextRotate||0, 16
+      ));
+    }
+
+  }
+
+  return wrap;
+}
+
+
+function buildGrid() {
+  const grid = document.getElementById('formats-grid');
+  grid.innerHTML = '';
+  FORMATS.forEach(fmt => {
+    const card = document.createElement('div');
+    card.className = 'format-card'; card.id = 'card-'+fmt.id;
+    card.innerHTML = `
+      <div class="format-card-header">
+        <div class="fch-left"><h3>${fmt.label}</h3><span>${fmt.sub} px</span></div>
+        <div class="fch-right">
+          <button class="btn-sm" id="custbtn-${fmt.id}" onclick="toggleCustomize('${fmt.id}')">Customize</button>
+        </div>
+      </div>
+      <div class="format-preview-wrap" id="preview-${fmt.id}"></div>`;
+    grid.appendChild(card);
+  });
+}
+
+
+
+// ── STYLE SWITCHER ──
+let currentStyle = 'dark';
+let currentOverlayMode = 'light';
+
+function toggleAcc(header) {
+  header.classList.toggle('collapsed');
+  header.nextElementSibling.classList.toggle('collapsed');
+}
+
+function setStyle(s) {
+  currentStyle = s;
+  document.querySelectorAll('.style-opt').forEach(el => {
+    el.classList.toggle('active', el.dataset.style === s);
+  });
+  updateSidebarForStyle(s);
+  refreshAllPreviews();
+}
+
+function updateSidebarForStyle(s) {
+  const isBS = s === 'blank-slate';
+  ['sb-overlay-dark','sb-wrap-overlay-mode','sb-wrap-content-scale',
+   'sb-wrap-copy','sb-wrap-services','sb-wrap-cta','sb-corners-divider'
+  ].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('sb-hidden', isBS);
+  });
+  const bsTxtSec = document.getElementById('sb-wrap-blank-slate-text');
+  if (bsTxtSec) bsTxtSec.classList.toggle('sb-hidden', !isBS);
+}
+
+function updateModalForStyle(s) {
+  const isBS = s === 'blank-slate';
+  ['m-wrap-overlay-dark','m-wrap-overlay-mode','m-wrap-content-scale',
+   'm-wrap-copy','m-wrap-font-sizes','m-wrap-services'
+  ].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('sb-hidden', isBS);
+  });
+  ['m-tog-cta','m-tog-corners','m-tog-divider'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('sb-hidden', isBS);
+  });
+  const bsMEl = document.getElementById('m-wrap-blank-slate');
+  if (bsMEl) bsMEl.classList.toggle('sb-hidden', !isBS);
+}
+
+function setOverlayMode(mode) {
+  currentOverlayMode = mode;
+  document.getElementById('om-light').classList.toggle('active', mode === 'light');
+  document.getElementById('om-dark').classList.toggle('active', mode === 'dark');
+  refreshAllPreviews();
+}
+
+// ── MODAL ──
+let modalFmtId = null;
+
+function toggleCustomize(fmtId) { openModal(fmtId); }
+
+function openModal(fmtId) {
+  const fmt = FORMATS.find(f=>f.id===fmtId);
+  modalFmtId = fmtId;
+  document.getElementById('modal-title').textContent = fmt.label;
+  document.getElementById('modal-subtitle').textContent = fmt.sub + ' px';
+  document.getElementById('modal-export-btn').onclick = () => exportSingle(fmtId);
+  const s = mergeState(fmtId);
+  const ov = overrides[fmtId];
+  function sv(id,val){const e=document.getElementById(id);if(e)e.value=val;}
+  function sc(id,val){const e=document.getElementById(id);if(e)e.checked=val;}
+  sv('m-photoY',s.photoY);           mtxt('m-photoY-val',s.photoY+'%');
+  sv('m-photoScale',s.photoScale||100); mtxt('m-photoScale-val',(s.photoScale||100)+'%');
+  sv('m-overlay',s.overlayDark);     mtxt('m-overlay-val',s.overlayDark+'%');
+  const csPct = Math.round((s.contentScale||1)*100);
+  sv('m-contentScale', csPct);       mtxt('m-contentScale-val', csPct+'%');
+  // Overlay mode toggle
+  const om = s.overlayMode || 'light';
+  document.getElementById('m-om-light').classList.toggle('active', om === 'light');
+  document.getElementById('m-om-dark').classList.toggle('active', om === 'dark');
+  sv('m-logoSize',s.logoSize||34);   mtxt('m-logoSize-val',(s.logoSize||34)+'px');
+  sv('m-logoY',s.logoY||4);          mtxt('m-logoY-val',(s.logoY||4)+'%');
+  sv('m-contentY',s.contentY||0);    mtxt('m-contentY-val',(s.contentY||0)===0?'0%':((s.contentY>0?'+':'')+s.contentY+'%'));
+  sv('m-eyebrow',s.eyebrow);
+  sv('m-headline',s.headline);
+  sv('m-hlstyle',s.headlineStyle);
+  sv('m-cta',s.ctaText);
+  sv('m-hlsize',s.headlineSize);     mtxt('m-hlsize-val',s.headlineSize+'px');
+  sv('m-eyebrowSize',s.eyebrowSize||9); mtxt('m-eyebrowSize-val',(s.eyebrowSize||9)+'px');
+  sv('m-svcSize',s.svcSize||10);     mtxt('m-svcSize-val',(s.svcSize||10)+'px');
+  sv('m-ctaSize',s.ctaSize||9);      mtxt('m-ctaSize-val',(s.ctaSize||9)+'px');
+  sc('m-showEyebrow',s.showEyebrow!==false);
+  sc('m-showCta',s.showCta);
+  sc('m-showCorners',s.showCorners);
+  sc('m-showDivider',s.showDivider);
+  sc('m-showLogo',s.showLogo!==false);
+  sc('m-logoWhite',s.logoWhite===true);
+  const ovSvcs=ov.services||[], globalSvcs=getGlobal().services;
+  const activeSvcs=ovSvcs.length>0?ovSvcs:globalSvcs;
+  document.querySelectorAll('#m-services-grid input[data-svc]').forEach(cb=>{cb.checked=activeSvcs.includes(cb.dataset.svc);});
+  // ── Blank Slate per-format overrides ──
+  const bsSign = v => v > 0 ? '+'+v+'%' : v+'%';
+  sv('m-bsBgColor', s.bsBgColor || '#cc2222');
+  sc('m-bs2ImgShow', s.bs2ImgShow === true);
+  sv('m-bs2ImgScale', s.bs2ImgScale||60);  mtxt('m-bs2ImgScale-val', (s.bs2ImgScale||60)+'%');
+  sv('m-bs2ImgY', s.bs2ImgY||0);           mtxt('m-bs2ImgY-val', bsSign(s.bs2ImgY||0));
+  sv('m-bs2ImgX', s.bs2ImgX||0);           mtxt('m-bs2ImgX-val', bsSign(s.bs2ImgX||0));
+  sc('m-bsShowText', s.bsShowText !== false);
+  sv('m-bsText', s.bsText || '');
+  sv('m-bsFont', s.bsFont || 'Barlow');
+  sv('m-bsTextColor', s.bsTextColor || '#ffffff');
+  sv('m-bsTextSize', s.bsTextSize||54);     mtxt('m-bsTextSize-val', (s.bsTextSize||54)+'px');
+  sc('m-bsTextBold', s.bsTextBold === true);
+  sc('m-bsTextItalic', s.bsTextItalic === true);
+  sv('m-bsTextAlign', s.bsTextAlign || 'center');
+  sv('m-bsTextY', s.bsTextY||0);            mtxt('m-bsTextY-val', bsSign(s.bsTextY||0));
+  sv('m-bsTextRotate', s.bsTextRotate||0);  mtxt('m-bsTextRotate-val', (s.bsTextRotate||0)+'°');
+  sc('m-bs2ShowText', s.bs2ShowText === true);
+  sv('m-bs2Text', s.bs2Text || '');
+  sv('m-bs2Font', s.bs2Font || 'Barlow');
+  sv('m-bs2TextColor', s.bs2TextColor || '#ffffff');
+  sv('m-bs2TextSize', s.bs2TextSize||32);   mtxt('m-bs2TextSize-val', (s.bs2TextSize||32)+'px');
+  sc('m-bs2TextBold', s.bs2TextBold === true);
+  sc('m-bs2TextItalic', s.bs2TextItalic === true);
+  sv('m-bs2TextAlign', s.bs2TextAlign || 'center');
+  sv('m-bs2TextY', s.bs2TextY||20);         mtxt('m-bs2TextY-val', bsSign(s.bs2TextY||20));
+  sv('m-bs2TextRotate', s.bs2TextRotate||0);mtxt('m-bs2TextRotate-val', (s.bs2TextRotate||0)+'°');
+  document.getElementById('modal-reset').style.display=Object.keys(ov).length>0?'inline':'none';
+  updateModalForStyle(s.layoutStyle || currentStyle);
+  renderModalPreview();
+  document.getElementById('customize-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeModal() {
+  document.getElementById('customize-modal').classList.remove('open');
+  document.body.style.overflow='';
+  if (modalFmtId) {
+    const btn=document.getElementById('custbtn-'+modalFmtId);
+    const hasOv=Object.keys(overrides[modalFmtId]).length>0;
+    if(btn){btn.textContent=hasOv?'✦ Customize':'Customize';btn.classList.toggle('active',hasOv);}
+    refreshPreview(modalFmtId);
+    modalFmtId=null;
+  }
+}
+
+function mtxt(id,val){const e=document.getElementById(id);if(e)e.textContent=val;}
+
+function mOv(key,val){
+  if(!modalFmtId)return;
+  overrides[modalFmtId][key]=val;
+  document.getElementById('modal-reset').style.display='inline';
+  renderModalPreview();
+}
+
+function mSvcChange(){
+  if(!modalFmtId)return;
+  const checked=[...document.querySelectorAll('#m-services-grid input:checked')].map(c=>c.dataset.svc);
+  overrides[modalFmtId].services=checked;
+  document.getElementById('modal-reset').style.display='inline';
+  renderModalPreview();
+}
+
+function mOvOverlay(mode) {
+  document.getElementById('m-om-light').classList.toggle('active', mode === 'light');
+  document.getElementById('m-om-dark').classList.toggle('active', mode === 'dark');
+  mOv('overlayMode', mode);
+}
+
+function modalResetOv(){if(!modalFmtId)return;overrides[modalFmtId]={};openModal(modalFmtId);}
+
+function renderModalPreview(){
+  if(!modalFmtId)return;
+  const fmt=FORMATS.find(f=>f.id===modalFmtId);
+  const container=document.getElementById('modal-preview-inner');
+  const previewEl=document.getElementById('modal-preview');
+  container.innerHTML='';
+  const rect=previewEl.getBoundingClientRect();
+  const avW=rect.width-48,avH=rect.height-48;
+  if(avW<=0||avH<=0){requestAnimationFrame(renderModalPreview);return;}
+  let pw,ph;
+  if(fmt.aspect>=1){pw=Math.min(avW,Math.round(avH*fmt.aspect));ph=Math.round(pw/fmt.aspect);if(ph>avH){ph=avH;pw=Math.round(ph*fmt.aspect);}}
+  else{ph=avH;pw=Math.round(ph*fmt.aspect);if(pw>avW){pw=avW;ph=Math.round(pw/fmt.aspect);}}
+  pw=Math.max(pw,80);
+  container.appendChild(buildPost(fmt,mergeState(modalFmtId),pw));
+}
+
+document.getElementById('customize-modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+function refreshPreview(fmtId){
+  const fmt=FORMATS.find(f=>f.id===fmtId);
+  const wrap=document.getElementById('preview-'+fmtId);
+  if(!wrap||!fmt)return;
+  wrap.innerHTML='';
+  const s=mergeState(fmtId);
+  const maxW=wrap.parentElement.offsetWidth-32;
+  let pw;
+  if(fmt.aspect>=1)pw=Math.min(fmt.preview,maxW);
+  else pw=Math.round(fmt.preview*fmt.aspect);
+  pw=Math.max(pw,60);
+  wrap.style.minHeight=Math.round(pw/fmt.aspect)+'px';
+  wrap.appendChild(buildPost(fmt,s,pw));
+}
+
+function refreshAllPreviews(){
+  FORMATS.forEach(f=>refreshPreview(f.id));
+  if(modalFmtId)renderModalPreview();
+}
+
+document.querySelectorAll('#sidebar input, #sidebar select').forEach(el=>{
+  el.addEventListener('input',refreshAllPreviews);
+  el.addEventListener('change',refreshAllPreviews);
+});
+document.getElementById('photoY').addEventListener('input',function(){document.getElementById('photoYVal').textContent=this.value+'%';});
+document.getElementById('photoScale').addEventListener('input',function(){document.getElementById('photoScaleVal').textContent=this.value+'%';});
+document.getElementById('blankSlateBgInput').addEventListener('change',async function(e){
+  const file=e.target.files[0];if(!file)return;
+  const nameEl=document.getElementById('blankSlateBgName');
+  nameEl.textContent='Uploading…';
+  try{
+    blankSlateBgUrl=await uploadToStorage(file);
+    nameEl.textContent=file.name;
+    refreshAllPreviews();
+  }catch(err){
+    console.error('Upload failed, using local preview',err);
+    const reader=new FileReader();reader.onload=ev=>{blankSlateBgUrl=ev.target.result;nameEl.textContent=file.name+' (local)';refreshAllPreviews();};reader.readAsDataURL(file);
+  }
+});
+document.getElementById('overlayDark').addEventListener('input',function(){document.getElementById('overlayDarkVal').textContent=this.value+'%';});
+document.getElementById('headlineSize').addEventListener('input',function(){document.getElementById('headlineSizeVal').textContent=this.value+'px';});
+document.getElementById('contentScale').addEventListener('input',function(){document.getElementById('contentScaleVal').textContent=this.value+'%';});
+document.getElementById('bsTextSize').addEventListener('input',function(){document.getElementById('bsTextSizeVal').textContent=this.value+'px';});
+document.getElementById('bsTextY').addEventListener('input',function(){const v=+this.value;document.getElementById('bsTextYVal').textContent=(v>0?'+':'')+v+'%';});
+document.getElementById('bsTextRotate').addEventListener('input',function(){document.getElementById('bsTextRotateVal').textContent=this.value+'°';});
+document.getElementById('bs2TextSize').addEventListener('input',function(){document.getElementById('bs2TextSizeVal').textContent=this.value+'px';});
+document.getElementById('bs2TextY').addEventListener('input',function(){const v=+this.value;document.getElementById('bs2TextYVal').textContent=(v>0?'+':'')+v+'%';});
+document.getElementById('bs2TextRotate').addEventListener('input',function(){document.getElementById('bs2TextRotateVal').textContent=this.value+'°';});
+document.getElementById('bs2ImgScale').addEventListener('input',function(){document.getElementById('bs2ImgScaleVal').textContent=this.value+'%';});
+document.getElementById('bs2ImgY').addEventListener('input',function(){const v=+this.value;document.getElementById('bs2ImgYVal').textContent=(v>0?'+':'')+v+'%';});
+document.getElementById('bs2ImgX').addEventListener('input',function(){const v=+this.value;document.getElementById('bs2ImgXVal').textContent=(v>0?'+':'')+v+'%';});
+document.getElementById('bs2ImgInput').addEventListener('change',async function(e){
+  const file=e.target.files[0];if(!file)return;
+  const nameEl=document.getElementById('bs2ImgName');
+  nameEl.textContent='Uploading…';
+  try{
+    bs2ImageUrl=await uploadToStorage(file);
+    nameEl.textContent=file.name;
+    refreshAllPreviews();
+  }catch(err){
+    console.error('Upload failed, using local preview',err);
+    const reader=new FileReader();reader.onload=ev=>{bs2ImageUrl=ev.target.result;nameEl.textContent=file.name+' (local)';refreshAllPreviews();};reader.readAsDataURL(file);
+  }
+});
+document.getElementById('fileInput').addEventListener('change',async function(e){
+  const file=e.target.files[0];if(!file)return;
+  try{
+    photoUrl=await uploadToStorage(file);
+    refreshAllPreviews();
+  }catch(err){
+    console.error('Upload failed, using local preview',err);
+    const reader=new FileReader();reader.onload=ev=>{photoUrl=ev.target.result;refreshAllPreviews();};reader.readAsDataURL(file);
+  }
+});
+
+function setProgress(pct,label){document.getElementById('progress-bar').style.width=pct+'%';document.getElementById('progress-label').textContent=label;}
+
+function waitForImages(root){
+  const imgs=[...root.querySelectorAll('img')];
+  if(imgs.length===0)return Promise.resolve();
+  const loaders=imgs.map(img=>{
+    if(img.complete && img.naturalWidth>0)return Promise.resolve();
+    if(img.decode)return img.decode().catch(()=>{});
+    return new Promise(resolve=>{
+      img.addEventListener('load',resolve,{once:true});
+      img.addEventListener('error',resolve,{once:true});
+    });
+  });
+  return Promise.all(loaders);
+}
+
+const EXPORT_SCALE = 3;
+
+function waitForFonts(){
+  if(!document.fonts) return Promise.resolve();
+  // Explicitly load every weight+style variant used in the ads so html2canvas
+  // gets the real font data instead of synthesized bold/weight fallbacks.
+  const variants = [
+    "300 16px 'Barlow'",
+    "400 16px 'Barlow'",
+    "500 16px 'Barlow'",
+    "600 16px 'Barlow'",
+    "700 16px 'Barlow'",
+    "400 16px 'Playfair Display'",
+    "600 16px 'Playfair Display'",
+    "700 16px 'Playfair Display'",
+    "italic 400 16px 'Playfair Display'",
+    "italic 600 16px 'Playfair Display'",
+    "600 16px 'Dancing Script'",
+    "700 16px 'Dancing Script'",
+    "300 16px 'Oswald'",
+    "400 16px 'Oswald'",
+    "600 16px 'Oswald'",
+    "700 16px 'Oswald'",
+    "400 16px 'Montserrat'",
+    "600 16px 'Montserrat'",
+    "700 16px 'Montserrat'",
+    "italic 400 16px 'Montserrat'",
+    "300 16px 'Raleway'",
+    "400 16px 'Raleway'",
+    "600 16px 'Raleway'",
+    "700 16px 'Raleway'",
+    "400 16px 'Bebas Neue'",
+    "400 16px 'Pacifico'",
+  ];
+  const loads = variants.map(v => document.fonts.load(v).catch(()=>{}));
+  return Promise.all([document.fonts.ready.catch(()=>{}), ...loads]);
+}
+
+function waitForBackgroundImages(root){
+  const urls=new Set();
+  const nodes=[root,...root.querySelectorAll('*')];
+  nodes.forEach(el=>{
+    const bg=getComputedStyle(el).backgroundImage;
+    if(!bg||bg==='none')return;
+    const matches=[...bg.matchAll(/url\((['"]?)(.*?)\1\)/g)];
+    matches.forEach(m=>{if(m[2])urls.add(m[2]);});
+  });
+  if(urls.size===0)return Promise.resolve();
+  const loaders=[...urls].map(url=>new Promise(resolve=>{
+    const img=new Image();
+    if(!url.startsWith('data:'))img.crossOrigin='anonymous';
+    img.onload=()=>resolve();
+    img.onerror=()=>resolve();
+    img.src=url;
+  }));
+  return Promise.all(loaders);
+}
+
+async function renderToCanvas(fmt,s){
+  const pool=document.getElementById('render-pool');
+  const post=buildPost(fmt,s,fmt.w);
+  post.style.position='absolute';pool.appendChild(post);
+  await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+  await Promise.all([waitForFonts(),waitForImages(post),waitForBackgroundImages(post)]);
+  const canvas=await html2canvas(post,{scale:EXPORT_SCALE,useCORS:true,allowTaint:true,backgroundColor:null,logging:false,width:fmt.w,height:Math.round(fmt.h)});
+  pool.removeChild(post);return canvas;
+}
+
+function getExportSlug(){
+  const custom = (document.getElementById('exportName').value||'').trim();
+  const raw = custom || (document.getElementById('headline').value||'ad').trim();
+  return raw
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g,'-')
+    .replace(/^-+|-+$/g,'')
+    .slice(0,40) || 'ad';
+}
+
+async function exportAll(){
+  const btn=document.getElementById('exportAllBtn');btn.disabled=true;btn.textContent='Working…';
+  const pw=document.getElementById('progress-wrap');pw.style.display='block';
+  const slug=getExportSlug();
+  const zip=new JSZip();
+  for(let i=0;i<FORMATS.length;i++){
+    const fmt=FORMATS[i];setProgress(Math.round((i/FORMATS.length)*90),`Rendering ${fmt.label}…`);
+    try{const s=mergeState(fmt.id);const canvas=await renderToCanvas(fmt,s);zip.file(`${slug}-${fmt.id}-${fmt.w}x${fmt.h}.png`,canvas.toDataURL('image/png').split(',')[1],{base64:true});}
+    catch(e){console.warn(fmt.id,e);}
+  }
+  setProgress(95,'Zipping…');
+  const blob=await zip.generateAsync({type:'blob'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`${slug}-ads.zip`;a.click();URL.revokeObjectURL(url);
+  setProgress(100,'Done!');btn.disabled=false;btn.textContent='Export All Formats (ZIP)';
+  setTimeout(()=>{pw.style.display='none';setProgress(0,'');},2500);
+}
+
+async function exportSingle(fmtId){
+  const fmt=FORMATS.find(f=>f.id===fmtId);const s=mergeState(fmtId);
+  const canvas=await renderToCanvas(fmt,s);
+  const slug=getExportSlug();
+  const a=document.createElement('a');a.download=`${slug}-${fmt.id}-${fmt.w}x${fmt.h}.png`;a.href=canvas.toDataURL('image/png');a.click();
+}
+
+// ─── TEMPLATE SYSTEM (Supabase) ─────────────────────────────────────────────
+async function renderTemplateList() {
+  const el = document.getElementById('tpl-list');
+  if (!el) return;
+  el.innerHTML = '<div class="tpl-empty">Loading…</div>';
+  const { data, error } = await sb.from('templates')
+    .select('id, name, user_id, created_at')
+    .order('created_at', { ascending: false });
+  if (error) { el.innerHTML = '<div class="tpl-empty" style="color:#c44">Could not load templates</div>'; return; }
+  if (!data.length) { el.innerHTML = '<div class="tpl-empty">No saved templates</div>'; return; }
+  el.innerHTML = data.map(t => `
+    <div class="tpl-item">
+      <span class="tpl-name" onclick="applyTemplate('${t.id}')" title="Load \u201c${t.name}\u201d">${t.name}</span>
+      ${t.user_id === currentUser?.id
+        ? `<button class="tpl-del" onclick="deleteTemplate('${t.id}')" title="Delete">\u2715</button>`
+        : '<span style="width:22px;flex-shrink:0"></span>'}
+    </div>`).join('');
+}
+
+async function saveTemplate() {
+  if (!currentUser) return;
+  const nameEl = document.getElementById('tplNameInput');
+  const name = nameEl.value.trim();
+  if (!name) { nameEl.focus(); return; }
+  const btn = document.querySelector('.btn-tpl-save');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  const { error } = await sb.from('templates').insert({
+    user_id: currentUser.id,
+    name,
+    state_json: getGlobal(),
+    overrides_json: JSON.parse(JSON.stringify(overrides))
+  });
+  btn.disabled = false; btn.textContent = 'Save';
+  if (!error) { nameEl.value = ''; await renderTemplateList(); }
+  else alert('Error saving template: ' + error.message);
+}
+
+async function deleteTemplate(id) {
+  if (!confirm('Delete this template?')) return;
+  const { error } = await sb.from('templates').delete().eq('id', id);
+  if (!error) await renderTemplateList();
+  else alert('Error deleting: ' + error.message);
+}
+
+async function applyTemplate(id) {
+  const { data, error } = await sb.from('templates').select('state_json, overrides_json').eq('id', id).single();
+  if (error || !data) { alert('Could not load template.'); return; }
+  const s = data.state_json;
+
+  // Restore per-format overrides
+  Object.keys(overrides).forEach(k => delete overrides[k]);
+  if (data.overrides_json) Object.assign(overrides, JSON.parse(JSON.stringify(data.overrides_json)));
+
+  // Restore image URLs (Supabase Storage public URLs sync across team)
+  if (s.photoUrl)        { photoUrl = s.photoUrl; }
+  if (s.blankSlateBgUrl) { blankSlateBgUrl = s.blankSlateBgUrl; document.getElementById('blankSlateBgName').textContent = '(from template)'; }
+  if (s.bs2ImageUrl)     { bs2ImageUrl = s.bs2ImageUrl; document.getElementById('bs2ImgName').textContent = '(from template)'; }
+
+  // Set a sidebar DOM input
+  const set = (id, val) => {
+    const el = document.getElementById(id); if (!el) return;
+    if (el.type === 'checkbox') el.checked = !!val;
+    else if (val !== undefined && val !== null) el.value = val;
+  };
+
+  set('photoY',        s.photoY        ?? 30);
+  set('photoScale',    s.photoScale    ?? 100);
+  set('overlayDark',   s.overlayDark   ?? 55);
+  set('eyebrow',       s.eyebrow       ?? '');
+  set('headline',      s.headline      ?? '');
+  set('headlineStyle', s.headlineStyle ?? 'bold');
+  set('headlineSize',  s.headlineSize  ?? 32);
+  set('ctaText',       s.ctaText       ?? '');
+  set('showCta',       s.showCta       ?? false);
+  set('showCorners',   s.showCorners   ?? false);
+  set('showDivider',   s.showDivider   ?? false);
+  set('showLogo',      s.showLogo      ?? true);
+  set('logoWhite',     s.logoWhite     ?? false);
+  set('accentColor',   s.accent        ?? '#ae8d4d');
+  set('contentScale',  (s.contentScale ?? 1) * 100);
+  set('bsBgColor',     s.bsBgColor     ?? '#cc2222');
+  set('bsShowText',    s.bsShowText    ?? true);
+  set('bsText',        s.bsText        ?? '');
+  set('bsFont',        s.bsFont        ?? 'Barlow');
+  set('bsTextColor',   s.bsTextColor   ?? '#ffffff');
+  set('bsTextSize',    s.bsTextSize    ?? 54);
+  set('bsTextBold',    s.bsTextBold    ?? true);
+  set('bsTextItalic',  s.bsTextItalic  ?? false);
+  set('bsTextAlign',   s.bsTextAlign   ?? 'center');
+  set('bsTextY',       s.bsTextY       ?? 0);
+  set('bsTextRotate',  s.bsTextRotate  ?? 0);
+  set('bs2ShowText',   s.bs2ShowText   ?? false);
+  set('bs2Text',       s.bs2Text       ?? '');
+  set('bs2Font',       s.bs2Font       ?? 'Barlow');
+  set('bs2TextColor',  s.bs2TextColor  ?? '#ffffff');
+  set('bs2TextSize',   s.bs2TextSize   ?? 32);
+  set('bs2TextBold',   s.bs2TextBold   ?? false);
+  set('bs2TextItalic', s.bs2TextItalic ?? false);
+  set('bs2TextAlign',  s.bs2TextAlign  ?? 'center');
+  set('bs2TextY',      s.bs2TextY      ?? 20);
+  set('bs2TextRotate', s.bs2TextRotate ?? 0);
+  set('bs2ImgShow',    s.bs2ImgShow    ?? false);
+  set('bs2ImgScale',   s.bs2ImgScale   ?? 60);
+  set('bs2ImgY',       s.bs2ImgY       ?? 0);
+  set('bs2ImgX',       s.bs2ImgX       ?? 0);
+
+  // Services checkboxes
+  document.querySelectorAll('#services-grid input').forEach(cb => {
+    cb.checked = (s.services || []).includes(cb.dataset.svc);
+  });
+
+  // Style & overlay mode (these also call updateSidebarForStyle / refreshAllPreviews)
+  if (s.layoutStyle) setStyle(s.layoutStyle);
+  if (s.overlayMode) setOverlayMode(s.overlayMode);
+
+  // Sync all sidebar range display spans
+  const sgn = v => (v > 0 ? '+' : '') + v + '%';
+  [
+    ['photoY',       'photoYVal',       v => v + '%'],
+    ['photoScale',   'photoScaleVal',   v => v + '%'],
+    ['overlayDark',  'overlayDarkVal',  v => v + '%'],
+    ['headlineSize', 'headlineSizeVal', v => v + 'px'],
+    ['contentScale', 'contentScaleVal', v => v + '%'],
+    ['bsTextSize',   'bsTextSizeVal',   v => v + 'px'],
+    ['bsTextY',      'bsTextYVal',      v => sgn(v)],
+    ['bsTextRotate', 'bsTextRotateVal', v => v + '\u00b0'],
+    ['bs2TextSize',  'bs2TextSizeVal',  v => v + 'px'],
+    ['bs2TextY',     'bs2TextYVal',     v => sgn(v)],
+    ['bs2TextRotate','bs2TextRotateVal',v => v + '\u00b0'],
+    ['bs2ImgScale',  'bs2ImgScaleVal',  v => v + '%'],
+    ['bs2ImgY',      'bs2ImgYVal',      v => sgn(v)],
+    ['bs2ImgX',      'bs2ImgXVal',      v => sgn(v)],
+  ].forEach(([inId, spId, fmt]) => {
+    const inp = document.getElementById(inId);
+    const spn = document.getElementById(spId);
+    if (inp && spn) spn.textContent = fmt(+inp.value);
+  });
+
+  refreshAllPreviews();
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+buildGrid();
+updateSidebarForStyle(currentStyle);
+window.addEventListener('resize',()=>{if(modalFmtId)renderModalPreview();});
+prepareInvertedLogo();
+
+// Auth state listener — handles initial session check AND magic link redirects
+sb.auth.onAuthStateChange(async (event, session) => {
+  currentUser = session?.user ?? null;
+  const overlay = document.getElementById('auth-overlay');
+  const badge   = document.getElementById('user-badge');
+  if (currentUser) {
+    overlay.style.display = 'none';
+    badge.style.display = 'flex';
+    document.getElementById('user-badge-email').textContent = currentUser.email;
+    await renderTemplateList();
+  } else {
+    overlay.style.display = 'flex';
+    badge.style.display = 'none';
+  }
+});
+</script>
+</body>
+</html>
