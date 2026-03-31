@@ -7,7 +7,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Barlow:wght@300;400;500;600;700&family=Dancing+Script:wght@600;700&family=Oswald:wght@300;400;600;700&family=Montserrat:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Raleway:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Bebas+Neue&family=Pacifico&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #0f0f0f; color: #e0d8cc; font-family: 'Barlow', sans-serif; min-height: 100vh; display: flex; }
@@ -201,46 +200,12 @@ hr.sep { border:none; border-top:1px solid #252525; }
 .tpl-save-row input { flex:1; min-width:0; }
 .btn-tpl-save { font-size:9px; letter-spacing:0.12em; text-transform:uppercase; padding:6px 10px; border-radius:3px; cursor:pointer; font-family:'Barlow',sans-serif; border:1px solid #ae8d4d55; background:#1e1a0e; color:#ae8d4d; white-space:nowrap; transition:all 0.15s; }
 .btn-tpl-save:hover { background:#2a220e; border-color:#ae8d4d; }
-.btn-tpl-save:disabled { opacity:0.5; cursor:not-allowed; }
-/* ── Auth ──────────────────────────────────────────────────────────────────── */
-#auth-overlay { position:fixed; inset:0; background:#0f0f0f; z-index:9999; display:flex; align-items:center; justify-content:center; }
-#auth-card { background:#181818; border:1px solid #252525; border-radius:12px; padding:36px 32px; width:320px; display:flex; flex-direction:column; gap:16px; }
-#auth-card h2 { font-family:'Playfair Display',serif; font-style:italic; font-size:20px; font-weight:400; color:#e8d9b8; }
-#auth-card .auth-sub { font-size:11px; color:#666; line-height:1.6; }
-#auth-email-input { width:100%; background:#222; border:1px solid #333; color:#e0d8cc; font-family:'Barlow',sans-serif; font-size:12px; padding:9px 11px; border-radius:4px; outline:none; transition:border-color 0.2s; }
-#auth-email-input:focus { border-color:#ae8d4d; }
-#auth-submit-btn { padding:10px; background:#ae8d4d; color:#0b1928; font-weight:700; font-size:10px; letter-spacing:0.25em; text-transform:uppercase; border:none; border-radius:4px; cursor:pointer; font-family:'Barlow',sans-serif; transition:background 0.2s; }
-#auth-submit-btn:hover { background:#c9a55e; }
-#auth-submit-btn:disabled { background:#4a3d1e; color:#777; cursor:not-allowed; }
-#auth-msg { font-size:11px; min-height:16px; text-align:center; }
-#user-badge { display:none; align-items:center; justify-content:space-between; padding:7px 10px; background:#1e1a0e; border:1px solid #2e2610; border-radius:4px; }
-.user-badge-email { font-size:10px; color:#ae8d4d; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.btn-signout { font-size:9px; color:#555; background:none; border:none; cursor:pointer; letter-spacing:0.1em; padding:0 0 0 8px; flex-shrink:0; transition:color 0.15s; white-space:nowrap; }
-.btn-signout:hover { color:#c44; }
 </style>
 </head>
 <body>
 
-<!-- AUTH OVERLAY -->
-<div id="auth-overlay">
-  <div id="auth-card">
-    <div>
-      <div style="font-size:9px;letter-spacing:0.22em;color:#ae8d4d;text-transform:uppercase;margin-bottom:8px;">New York Sash</div>
-      <h2>Ad Export Suite</h2>
-    </div>
-    <p class="auth-sub">Sign in with your team email address to access shared templates and synced assets.</p>
-    <input type="email" id="auth-email-input" placeholder="your@email.com" onkeydown="if(event.key==='Enter')sendMagicLink()">
-    <button id="auth-submit-btn" onclick="sendMagicLink()">Send Magic Link</button>
-    <div id="auth-msg"></div>
-  </div>
-</div>
-
 <div id="sidebar">
   <h1><span>New York Sash</span>Ad Export Suite</h1>
-  <div id="user-badge">
-    <span class="user-badge-email" id="user-badge-email"></span>
-    <button class="btn-signout" onclick="signOut()">Sign out</button>
-  </div>
 
   <div>
     <span class="section-label">Photo</span>
@@ -807,46 +772,6 @@ hr.sep { border:none; border-top:1px solid #252525; }
 </div>
 
 <script>
-
-// ─── SUPABASE CONFIG ─────────────────────────────────────────────────────────
-// Get these from: supabase.com → your project → Settings → API
-const SUPABASE_URL = 'https://ferdegltxylqpdxgvmdk.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZlcmRlZ2x0eHlscXBkeGd2bWRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5OTU5MjMsImV4cCI6MjA5MDU3MTkyM30.mEx2S2GhJcJpX5FrjpyMvqgOcmkVCW7nvC6WbkJOhNo';
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-let currentUser = null;
-
-async function sendMagicLink() {
-  const emailEl = document.getElementById('auth-email-input');
-  const btn     = document.getElementById('auth-submit-btn');
-  const msg     = document.getElementById('auth-msg');
-  const email   = emailEl.value.trim();
-  if (!email) { emailEl.focus(); return; }
-  btn.disabled = true; btn.textContent = 'Sending…';
-  const { error } = await sb.auth.signInWithOtp({
-    email,
-    options: { emailRedirectTo: window.location.origin + window.location.pathname }
-  });
-  if (error) {
-    msg.textContent = error.message; msg.style.color = '#c44';
-    btn.disabled = false; btn.textContent = 'Send Magic Link';
-  } else {
-    msg.textContent = 'Check your email for the sign-in link!';
-    msg.style.color = '#ae8d4d'; btn.textContent = 'Link sent ✓';
-  }
-}
-
-async function signOut() {
-  await sb.auth.signOut();
-}
-
-async function uploadToStorage(file) {
-  const ext  = file.name.split('.').pop().toLowerCase();
-  const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-  const { error } = await sb.storage.from('ad-images').upload(path, file, { cacheControl: '3600', upsert: false });
-  if (error) throw error;
-  return sb.storage.from('ad-images').getPublicUrl(path).data.publicUrl;
-}
-// ─────────────────────────────────────────────────────────────────────────────
 
 const LOGO_SRC = 'logo-color.png';
 const LOGO_COLOR_SRC = 'logo-color.png';
@@ -1629,18 +1554,13 @@ document.querySelectorAll('#sidebar input, #sidebar select').forEach(el=>{
 });
 document.getElementById('photoY').addEventListener('input',function(){document.getElementById('photoYVal').textContent=this.value+'%';});
 document.getElementById('photoScale').addEventListener('input',function(){document.getElementById('photoScaleVal').textContent=this.value+'%';});
-document.getElementById('blankSlateBgInput').addEventListener('change',async function(e){
+document.getElementById('blankSlateBgInput').addEventListener('change',function(e){
   const file=e.target.files[0];if(!file)return;
-  const nameEl=document.getElementById('blankSlateBgName');
-  nameEl.textContent='Uploading…';
-  try{
-    blankSlateBgUrl=await uploadToStorage(file);
-    nameEl.textContent=file.name;
+  const reader=new FileReader();reader.onload=ev=>{
+    blankSlateBgUrl=ev.target.result;
+    document.getElementById('blankSlateBgName').textContent=file.name;
     refreshAllPreviews();
-  }catch(err){
-    console.error('Upload failed, using local preview',err);
-    const reader=new FileReader();reader.onload=ev=>{blankSlateBgUrl=ev.target.result;nameEl.textContent=file.name+' (local)';refreshAllPreviews();};reader.readAsDataURL(file);
-  }
+  };reader.readAsDataURL(file);
 });
 document.getElementById('overlayDark').addEventListener('input',function(){document.getElementById('overlayDarkVal').textContent=this.value+'%';});
 document.getElementById('headlineSize').addEventListener('input',function(){document.getElementById('headlineSizeVal').textContent=this.value+'px';});
@@ -1654,28 +1574,17 @@ document.getElementById('bs2TextRotate').addEventListener('input',function(){doc
 document.getElementById('bs2ImgScale').addEventListener('input',function(){document.getElementById('bs2ImgScaleVal').textContent=this.value+'%';});
 document.getElementById('bs2ImgY').addEventListener('input',function(){const v=+this.value;document.getElementById('bs2ImgYVal').textContent=(v>0?'+':'')+v+'%';});
 document.getElementById('bs2ImgX').addEventListener('input',function(){const v=+this.value;document.getElementById('bs2ImgXVal').textContent=(v>0?'+':'')+v+'%';});
-document.getElementById('bs2ImgInput').addEventListener('change',async function(e){
+document.getElementById('bs2ImgInput').addEventListener('change',function(e){
   const file=e.target.files[0];if(!file)return;
-  const nameEl=document.getElementById('bs2ImgName');
-  nameEl.textContent='Uploading…';
-  try{
-    bs2ImageUrl=await uploadToStorage(file);
-    nameEl.textContent=file.name;
+  const reader=new FileReader();reader.onload=ev=>{
+    bs2ImageUrl=ev.target.result;
+    document.getElementById('bs2ImgName').textContent=file.name;
     refreshAllPreviews();
-  }catch(err){
-    console.error('Upload failed, using local preview',err);
-    const reader=new FileReader();reader.onload=ev=>{bs2ImageUrl=ev.target.result;nameEl.textContent=file.name+' (local)';refreshAllPreviews();};reader.readAsDataURL(file);
-  }
+  };reader.readAsDataURL(file);
 });
-document.getElementById('fileInput').addEventListener('change',async function(e){
+document.getElementById('fileInput').addEventListener('change',function(e){
   const file=e.target.files[0];if(!file)return;
-  try{
-    photoUrl=await uploadToStorage(file);
-    refreshAllPreviews();
-  }catch(err){
-    console.error('Upload failed, using local preview',err);
-    const reader=new FileReader();reader.onload=ev=>{photoUrl=ev.target.result;refreshAllPreviews();};reader.readAsDataURL(file);
-  }
+  const reader=new FileReader();reader.onload=ev=>{photoUrl=ev.target.result;refreshAllPreviews();};reader.readAsDataURL(file);
 });
 
 function setProgress(pct,label){document.getElementById('progress-bar').style.width=pct+'%';document.getElementById('progress-label').textContent=label;}
@@ -1796,63 +1705,49 @@ async function exportSingle(fmtId){
   const a=document.createElement('a');a.download=`${slug}-${fmt.id}-${fmt.w}x${fmt.h}.png`;a.href=canvas.toDataURL('image/png');a.click();
 }
 
-// ─── TEMPLATE SYSTEM (Supabase) ─────────────────────────────────────────────
-async function renderTemplateList() {
+// ─── TEMPLATE SYSTEM (localStorage) ─────────────────────────────────────────
+const TPL_KEY = 'nys_ad_templates';
+function _tplLoad() { try { return JSON.parse(localStorage.getItem(TPL_KEY) || '[]'); } catch(e) { return []; } }
+function _tplSave(list) { localStorage.setItem(TPL_KEY, JSON.stringify(list)); }
+
+function renderTemplateList() {
+  const list = _tplLoad();
   const el = document.getElementById('tpl-list');
   if (!el) return;
-  el.innerHTML = '<div class="tpl-empty">Loading…</div>';
-  const { data, error } = await sb.from('templates')
-    .select('id, name, user_id, created_at')
-    .order('created_at', { ascending: false });
-  if (error) { el.innerHTML = '<div class="tpl-empty" style="color:#c44">Could not load templates</div>'; return; }
-  if (!data.length) { el.innerHTML = '<div class="tpl-empty">No saved templates</div>'; return; }
-  el.innerHTML = data.map(t => `
+  if (!list.length) { el.innerHTML = '<div class="tpl-empty">No saved templates</div>'; return; }
+  el.innerHTML = list.map((t, i) => `
     <div class="tpl-item">
-      <span class="tpl-name" onclick="applyTemplate('${t.id}')" title="Load \u201c${t.name}\u201d">${t.name}</span>
-      ${t.user_id === currentUser?.id
-        ? `<button class="tpl-del" onclick="deleteTemplate('${t.id}')" title="Delete">\u2715</button>`
-        : '<span style="width:22px;flex-shrink:0"></span>'}
+      <span class="tpl-name" onclick="applyTemplate(${i})" title="Load \u201c${t.name}\u201d">${t.name}</span>
+      <button class="tpl-del" onclick="deleteTemplate(${i})" title="Delete">\u2715</button>
     </div>`).join('');
 }
 
-async function saveTemplate() {
-  if (!currentUser) return;
+function saveTemplate() {
   const nameEl = document.getElementById('tplNameInput');
   const name = nameEl.value.trim();
   if (!name) { nameEl.focus(); return; }
-  const btn = document.querySelector('.btn-tpl-save');
-  btn.disabled = true; btn.textContent = 'Saving…';
-  const { error } = await sb.from('templates').insert({
-    user_id: currentUser.id,
-    name,
-    state_json: getGlobal(),
-    overrides_json: JSON.parse(JSON.stringify(overrides))
-  });
-  btn.disabled = false; btn.textContent = 'Save';
-  if (!error) { nameEl.value = ''; await renderTemplateList(); }
-  else alert('Error saving template: ' + error.message);
+  const list = _tplLoad();
+  list.push({ name, state: getGlobal(), overrides: JSON.parse(JSON.stringify(overrides)) });
+  _tplSave(list);
+  nameEl.value = '';
+  renderTemplateList();
 }
 
-async function deleteTemplate(id) {
-  if (!confirm('Delete this template?')) return;
-  const { error } = await sb.from('templates').delete().eq('id', id);
-  if (!error) await renderTemplateList();
-  else alert('Error deleting: ' + error.message);
+function deleteTemplate(i) {
+  const list = _tplLoad();
+  list.splice(i, 1);
+  _tplSave(list);
+  renderTemplateList();
 }
 
-async function applyTemplate(id) {
-  const { data, error } = await sb.from('templates').select('state_json, overrides_json').eq('id', id).single();
-  if (error || !data) { alert('Could not load template.'); return; }
-  const s = data.state_json;
+function applyTemplate(i) {
+  const list = _tplLoad();
+  const tpl = list[i]; if (!tpl) return;
+  const s = tpl.state;
 
   // Restore per-format overrides
   Object.keys(overrides).forEach(k => delete overrides[k]);
-  if (data.overrides_json) Object.assign(overrides, JSON.parse(JSON.stringify(data.overrides_json)));
-
-  // Restore image URLs (Supabase Storage public URLs sync across team)
-  if (s.photoUrl)        { photoUrl = s.photoUrl; }
-  if (s.blankSlateBgUrl) { blankSlateBgUrl = s.blankSlateBgUrl; document.getElementById('blankSlateBgName').textContent = '(from template)'; }
-  if (s.bs2ImageUrl)     { bs2ImageUrl = s.bs2ImageUrl; document.getElementById('bs2ImgName').textContent = '(from template)'; }
+  if (tpl.overrides) Object.assign(overrides, JSON.parse(JSON.stringify(tpl.overrides)));
 
   // Set a sidebar DOM input
   const set = (id, val) => {
@@ -1940,24 +1835,10 @@ async function applyTemplate(id) {
 
 buildGrid();
 updateSidebarForStyle(currentStyle);
+renderTemplateList();
 window.addEventListener('resize',()=>{if(modalFmtId)renderModalPreview();});
 prepareInvertedLogo();
-
-// Auth state listener — handles initial session check AND magic link redirects
-sb.auth.onAuthStateChange(async (event, session) => {
-  currentUser = session?.user ?? null;
-  const overlay = document.getElementById('auth-overlay');
-  const badge   = document.getElementById('user-badge');
-  if (currentUser) {
-    overlay.style.display = 'none';
-    badge.style.display = 'flex';
-    document.getElementById('user-badge-email').textContent = currentUser.email;
-    await renderTemplateList();
-  } else {
-    overlay.style.display = 'flex';
-    badge.style.display = 'none';
-  }
-});
+refreshAllPreviews();
 </script>
 </body>
 </html>
