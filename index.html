@@ -1708,7 +1708,14 @@ async function exportSingle(fmtId){
 // ─── TEMPLATE SYSTEM (localStorage) ─────────────────────────────────────────
 const TPL_KEY = 'nys_ad_templates';
 function _tplLoad() { try { return JSON.parse(localStorage.getItem(TPL_KEY) || '[]'); } catch(e) { return []; } }
-function _tplSave(list) { localStorage.setItem(TPL_KEY, JSON.stringify(list)); }
+function _tplSave(list) {
+  try {
+    localStorage.setItem(TPL_KEY, JSON.stringify(list));
+  } catch(e) {
+    alert('Could not save template — storage quota exceeded. Try deleting old templates first.');
+    throw e;
+  }
+}
 
 function renderTemplateList() {
   const list = _tplLoad();
@@ -1727,10 +1734,17 @@ function saveTemplate() {
   const name = nameEl.value.trim();
   if (!name) { nameEl.focus(); return; }
   const list = _tplLoad();
-  list.push({ name, state: getGlobal(), overrides: JSON.parse(JSON.stringify(overrides)) });
-  _tplSave(list);
-  nameEl.value = '';
-  renderTemplateList();
+  // Strip image data (base64 can be several MB) — templates save settings only
+  const state = { ...getGlobal() };
+  delete state.photoUrl;
+  delete state.blankSlateBgUrl;
+  delete state.bs2ImageUrl;
+  try {
+    list.push({ name, state, overrides: JSON.parse(JSON.stringify(overrides)) });
+    _tplSave(list);
+    nameEl.value = '';
+    renderTemplateList();
+  } catch(e) { /* quota error already alerted in _tplSave */ }
 }
 
 function deleteTemplate(i) {
