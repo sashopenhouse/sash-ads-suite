@@ -1464,6 +1464,10 @@ function setStyle(s) {
   document.querySelectorAll('.style-opt').forEach(el => {
     el.classList.toggle('active', el.dataset.style === s);
   });
+  if (s === 'bold') {
+    const acc = document.getElementById('accentColor');
+    if (acc) acc.value = '#cc2222';
+  }
   updateSidebarForStyle(s);
   refreshAllPreviews();
 }
