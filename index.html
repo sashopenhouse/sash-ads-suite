@@ -1453,6 +1453,14 @@ function buildGrid() {
 // ── STYLE SWITCHER ──
 let currentStyle = 'dark';
 let currentOverlayMode = 'dark';
+const accentInput = document.getElementById('accentColor');
+const accentDefaults = {
+  dark: accentInput ? accentInput.value : '#c9963d',
+  light: '#c8a96e',
+  bold: '#cc2222',
+  'blank-slate': accentInput ? accentInput.value : '#c9963d'
+};
+const accentByStyle = { ...accentDefaults };
 
 function toggleAcc(header) {
   header.classList.toggle('collapsed');
@@ -1460,16 +1468,21 @@ function toggleAcc(header) {
 }
 
 function setStyle(s) {
+  if (accentInput) accentByStyle[currentStyle] = accentInput.value;
   currentStyle = s;
   document.querySelectorAll('.style-opt').forEach(el => {
     el.classList.toggle('active', el.dataset.style === s);
   });
-  if (s === 'bold') {
-    const acc = document.getElementById('accentColor');
-    if (acc) acc.value = '#cc2222';
-  }
+  if (accentInput) accentInput.value = accentByStyle[s] || accentDefaults[s] || accentInput.value;
   updateSidebarForStyle(s);
   refreshAllPreviews();
+}
+
+if (accentInput) {
+  accentInput.addEventListener('input', () => {
+    accentByStyle[currentStyle] = accentInput.value;
+    refreshAllPreviews();
+  });
 }
 
 function updateSidebarForStyle(s) {
