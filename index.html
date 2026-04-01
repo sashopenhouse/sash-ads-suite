@@ -1467,26 +1467,36 @@ function setStyle(s) {
 }
 
 function updateSidebarForStyle(s) {
-  const isBS = s === 'blank-slate';
+  const isBS   = s === 'blank-slate';
+  const isDark = s === 'dark';
   ['sb-overlay-dark','sb-wrap-overlay-mode','sb-wrap-content-scale',
-   'sb-wrap-copy','sb-wrap-services','sb-wrap-cta','sb-corners-divider'
+   'sb-wrap-copy','sb-wrap-services','sb-wrap-cta'
   ].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.toggle('sb-hidden', isBS);
   });
+  // Corners + divider only exist in Dark & Refined
+  const cornersEl = document.getElementById('sb-corners-divider');
+  if (cornersEl) cornersEl.classList.toggle('sb-hidden', !isDark);
   const bsTxtSec = document.getElementById('sb-wrap-blank-slate-text');
   if (bsTxtSec) bsTxtSec.classList.toggle('sb-hidden', !isBS);
 }
 
 function updateModalForStyle(s) {
-  const isBS = s === 'blank-slate';
+  const isBS   = s === 'blank-slate';
+  const isDark = s === 'dark';
   ['m-wrap-overlay-dark','m-wrap-overlay-mode','m-wrap-content-scale',
    'm-wrap-copy','m-wrap-font-sizes','m-wrap-services'
   ].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.toggle('sb-hidden', isBS);
   });
-  ['m-tog-cta','m-tog-corners','m-tog-divider'].forEach(id => {
+  // Corners + divider only exist in Dark & Refined
+  ['m-tog-corners','m-tog-divider'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('sb-hidden', !isDark);
+  });
+  ['m-tog-cta'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.toggle('sb-hidden', isBS);
   });
