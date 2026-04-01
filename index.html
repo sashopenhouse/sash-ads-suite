@@ -428,7 +428,7 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
       <label>Button text</label>
       <input type="text" id="ctaText" value="Schedule a Free Consultation">
       <div class="toggle-row"><label>Show button</label><input type="checkbox" id="showCta" checked></div>
-      <div class="color-row">
+      <div class="color-row" id="sb-accent-row">
         <input type="color" id="accentColor" value="#ae8d4d">
         <label>Accent color</label>
       </div>
@@ -1471,12 +1471,15 @@ function setStyle(s) {
 function updateSidebarForStyle(s) {
   const isBS   = s === 'blank-slate';
   const isDark = s === 'dark';
+  const showAccent = s === 'dark' || s === 'bold';
   ['sb-overlay-dark','sb-wrap-overlay-mode','sb-wrap-content-scale',
    'sb-wrap-copy','sb-wrap-services','sb-wrap-cta'
   ].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.toggle('sb-hidden', isBS);
   });
+  const accentRow = document.getElementById('sb-accent-row');
+  if (accentRow) accentRow.classList.toggle('sb-hidden', !showAccent);
   // Corners + divider only exist in Dark & Refined
   const cornersEl = document.getElementById('sb-corners-divider');
   if (cornersEl) cornersEl.classList.toggle('sb-hidden', !isDark);
