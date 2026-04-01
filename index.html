@@ -1868,6 +1868,13 @@ function renderTemplateList() {
     </div>`).join('');
 }
 
+function applyDefaultTemplate() {
+  const list = _tplLoad();
+  if (!list.length) return;
+  const idx = list.findIndex(t => t && t.name === 'Cooperstown');
+  if (idx >= 0) applyTemplate(idx);
+}
+
 function saveTemplate() {
   const nameEl = document.getElementById('tplNameInput');
   const name = nameEl.value.trim();
@@ -2006,6 +2013,7 @@ function toggleTheme() {
 buildGrid();
 updateSidebarForStyle(currentStyle);
 renderTemplateList();
+applyDefaultTemplate();
 window.addEventListener('resize',()=>{if(modalFmtId)renderModalPreview();});
 prepareInvertedLogo();
 refreshAllPreviews();
