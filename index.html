@@ -1186,8 +1186,8 @@ function buildPost(fmt, s, containerW) {
     const headlineColor = useLight ? '#f5ece0' : '#1a1208';
     const eyebrowColor  = useLight ? 'rgba(255,245,228,0.88)' : 'rgba(30,20,8,0.7)';
     const svcColor      = useLight ? 'rgba(255,245,228,0.82)' : 'rgba(30,20,8,0.65)';
-    const sepColor      = '#c8a96e';
-    const ctaBg         = useLight ? '#c8a96e' : '#1a1208';
+    const sepColor      = acc;
+    const ctaBg         = acc;
     const ctaTextColor  = useLight ? '#1a1208' : '#f5ece0';
 
     const logoH = Math.max(10, Math.round((s.logoSize||36)*cs));
@@ -1243,7 +1243,7 @@ function buildPost(fmt, s, containerW) {
 
   } else if (style === 'bold') {
     // ── STYLE 3: Bold & Modern (main site) ──
-    const red = '#cc2222';
+    const red = acc;
     const headlineColor = isLight ? '#ffffff' : '#ffffff';
     const eyebrowColor  = isLight ? 'rgba(255,255,255,0.9)' : red;
     const svcColor      = isLight ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.6)';
