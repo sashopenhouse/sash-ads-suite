@@ -243,6 +243,7 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
 .light-swatch { background:linear-gradient(135deg,#f0ebe0 60%,#7a6a4a 100%); }
 .bold-swatch { background:linear-gradient(135deg,#1a1a2e 60%,#cc2222 100%); }
 .blank-slate-swatch { background:linear-gradient(135deg,#cc2222 55%,#ff5555 100%); }
+.retro-swatch { background:linear-gradient(135deg,#cc2222 40%,#8a0f0f 100%); }
 .style-opt-label { font-size:12px; color:var(--tx2); line-height:1.4; font-weight:500; }
 .style-opt-label span { font-size:10px; color:var(--tx3); font-weight:400; }
 .style-opt.active .style-opt-label { color:var(--tx); }
@@ -354,6 +355,10 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
       <div class="style-opt" data-style="blank-slate" onclick="setStyle('blank-slate')">
         <div class="style-swatch blank-slate-swatch"></div>
         <div class="style-opt-label">Blank Slate<br><span>Custom background</span></div>
+      </div>
+      <div class="style-opt" data-style="retro" onclick="setStyle('retro')">
+        <div class="style-swatch retro-swatch"></div>
+        <div class="style-opt-label">Retro Sale<br><span>Sunburst, pop-art promo</span></div>
       </div>
     </div>
   </div>
@@ -592,6 +597,17 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
     </div>
   </div>
 
+  </div>
+
+  <div id="sb-wrap-retro" class="sb-hidden">
+  <hr class="sep">
+  <div>
+    <span class="section-label">Retro Sale</span>
+    <div class="field-group">
+      <label>Discount ribbon text</label>
+      <input type="text" id="patrioticDiscount" value="25% OFF EVERYTHING">
+    </div>
+  </div>
   </div>
 
   <hr class="sep">
@@ -864,6 +880,16 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
 
         </div>
 
+        <!-- SECTION: Retro Sale overrides -->
+        <div id="m-wrap-retro" class="sb-hidden">
+          <hr>
+          <div class="mc-section">
+            <div class="mc-section-head">Retro Sale</div>
+            <label>Discount ribbon text</label>
+            <input type="text" id="m-patrioticDiscount" oninput="mOv('patrioticDiscount',this.value)">
+          </div>
+        </div>
+
       </div>
     </div>
     <div class="modal-footer">
@@ -964,6 +990,7 @@ function getGlobal() {
     bs2ImgScale:   +document.getElementById('bs2ImgScale').value,
     bs2ImgY:       +document.getElementById('bs2ImgY').value,
     bs2ImgX:       +document.getElementById('bs2ImgX').value,
+    patrioticDiscount: document.getElementById('patrioticDiscount').value,
   };
 }
 
@@ -980,7 +1007,8 @@ function mergeState(fmtId) {
    'eyebrowSize','svcSize','ctaSize','layoutStyle','contentScale','overlayMode',
    'bsShowText','bsText','bsFont','bsTextColor','bsTextSize','bsTextBold','bsTextItalic','bsTextAlign','bsTextY','bsBgColor','bsTextRotate',
    'bs2ShowText','bs2Text','bs2Font','bs2TextColor','bs2TextSize','bs2TextBold','bs2TextItalic','bs2TextAlign','bs2TextY','bs2TextRotate',
-   'bs2ImgShow','bs2ImgScale','bs2ImgY','bs2ImgX'
+   'bs2ImgShow','bs2ImgScale','bs2ImgY','bs2ImgX',
+   'patrioticDiscount'
   ].forEach(k => {
     m[k] = ov[k] !== undefined ? ov[k] : g[k];
   });
@@ -1021,6 +1049,7 @@ function mergeState(fmtId) {
   if (m.bs2ImgScale === undefined) m.bs2ImgScale = 60;
   if (m.bs2ImgY === undefined) m.bs2ImgY = 0;
   if (m.bs2ImgX === undefined) m.bs2ImgX = 0;
+  if (!m.patrioticDiscount) m.patrioticDiscount = '25% OFF EVERYTHING';
   return m;
 }
 
@@ -1424,6 +1453,176 @@ function buildPost(fmt, s, containerW) {
       ));
     }
 
+  } else if (style === 'retro') {
+    // ── STYLE 5: Retro / Comic-Pop Sale ──
+    // Sunburst BG (yellow+orange rays + halftone dots), bold outlined headline,
+    // large discount, services strip, dark footer with contact info.
+    const retroYellow = '#cc2222';
+    const retroOrange = '#8a0f0f';
+    const retroRed    = '#ffffff';
+    const retroBlack  = '#1a1a1a';
+
+    const retroDiscount = s.patrioticDiscount || '25% OFF EVERYTHING';
+
+    // ── Kill default bg/tint — we paint everything ourselves ──
+    bg.style.backgroundImage = 'none';
+    bg.style.background = 'transparent';
+    bg.style.transform = 'none';
+    tint.style.background = 'transparent';
+
+    // ── Full-canvas sunburst layer ──
+    // Build conic-gradient with 20 alternating ray slices
+    const raySlice = 360 / 20;
+    const stops = [];
+    for (let i = 0; i < 20; i++) {
+      const col = i % 2 === 0 ? retroYellow : retroOrange;
+      stops.push(`${col} ${(i * raySlice).toFixed(1)}deg`);
+      stops.push(`${col} ${((i + 1) * raySlice).toFixed(1)}deg`);
+    }
+    const sunburstBg = document.createElement('div');
+    sunburstBg.style.cssText =
+      `position:absolute;inset:0;z-index:0;` +
+      `background:conic-gradient(from -9deg at 50% 48%, ${stops.join(',')});`;
+    wrap.appendChild(sunburstBg);
+
+    // ── Halftone radial-dot overlay ──
+    const dotSzPx = Math.max(2, Math.round(5 * scale));
+    const dotGap  = Math.max(4, Math.round(12 * scale));
+    const halftoneLay = document.createElement('div');
+    halftoneLay.style.cssText =
+      `position:absolute;inset:0;z-index:1;pointer-events:none;` +
+      `background-image:radial-gradient(circle,${retroOrange} ${dotSzPx}px,transparent ${dotSzPx}px);` +
+      `background-size:${dotGap}px ${dotGap}px;opacity:0.35;`;
+    wrap.appendChild(halftoneLay);
+
+    // ── Radial glow in center (bright highlight) ──
+    const glowLay = document.createElement('div');
+    glowLay.style.cssText =
+      `position:absolute;inset:0;z-index:2;pointer-events:none;` +
+      `background:radial-gradient(ellipse 55% 45% at 50% 48%,rgba(255,200,200,0.45) 0%,transparent 70%);`;
+    wrap.appendChild(glowLay);
+
+    // ── Photo — upper half, cut in at an angle ──
+    const photoH = Math.round(H * 0.48);
+    if (s.photoUrl) {
+      const photoDiv = document.createElement('div');
+      photoDiv.style.cssText =
+        `position:absolute;top:0;left:0;width:${W}px;height:${photoH}px;` +
+        `background-image:url(${s.photoUrl});background-size:${(s.photoScale||100) > 100 ? s.photoScale+'%' : 'cover'};` +
+        `background-position:center ${s.photoY||30}%;background-repeat:no-repeat;` +
+        `z-index:3;clip-path:polygon(0 0,100% 0,100% 82%,0 100%);`;
+      // Slight dark vignette at bottom of photo to blend
+      const pVig = document.createElement('div');
+      pVig.style.cssText = `position:absolute;inset:0;background:linear-gradient(to bottom,transparent 50%,rgba(0,0,0,0.35) 100%);`;
+      photoDiv.appendChild(pVig);
+      wrap.appendChild(photoDiv);
+    }
+
+    // ── Logo ──
+    if (s.showLogo !== false) {
+      const logoH2  = Math.max(10, Math.round((s.logoSize || 28) * cs));
+      const logoPad = Math.round(14 * cs);
+      const lWrap   = document.createElement('div');
+      lWrap.style.cssText = `position:absolute;top:${logoPad}px;left:${logoPad}px;z-index:10;pointer-events:none;`;
+      const lImg = document.createElement('img');
+      lImg.src = LOGO_COLOR_SRC;
+      lImg.style.cssText = `height:${logoH2}px;width:auto;display:block;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.5));`;
+      lWrap.appendChild(lImg);
+      wrap.appendChild(lWrap);
+    }
+
+    // ── Content block — position respects contentY slider ──
+    const contentYOffset = Math.round((s.contentY || 0) / 100 * H);
+    const contentTop = (s.photoUrl ? Math.round(H * 0.40) : Math.round(H * 0.12)) + contentYOffset;
+    const padX = Math.round(20 * cs);
+    const contentDiv = document.createElement('div');
+    contentDiv.style.cssText =
+      `position:absolute;top:${contentTop}px;left:${padX}px;right:${padX}px;` +
+      `display:flex;flex-direction:column;align-items:center;z-index:8;pointer-events:none;`;
+
+    // Eyebrow
+    if (s.showEyebrow !== false && s.eyebrow) {
+      const eyEl = document.createElement('div');
+      const eyFs = Math.max(6, Math.round((s.eyebrowSize || 9) * cs));
+      eyEl.style.cssText =
+        `font-family:'Barlow',sans-serif;font-size:${eyFs}px;font-weight:700;` +
+        `letter-spacing:0.28em;text-transform:uppercase;color:${retroBlack};` +
+        `background:${retroYellow};padding:${Math.round(2*cs)}px ${Math.round(10*cs)}px;` +
+        `margin-bottom:${Math.round(6*cs)}px;border:${Math.max(1,Math.round(2*cs))}px solid ${retroBlack};`;
+      eyEl.textContent = s.eyebrow;
+      contentDiv.appendChild(eyEl);
+    }
+
+    // Headline — bold outlined Oswald
+    const hlParts = s.headline.split('|').map(p => p.trim());
+    const hlFs = Math.max(14, Math.round(s.headlineSize * cs));
+    const strokePx = Math.max(1, Math.round(2.5 * cs));
+    hlParts.forEach((part, idx) => {
+      const pEl = document.createElement('div');
+      const isFirst = idx === 0;
+      pEl.style.cssText =
+        `font-family:'Oswald',sans-serif;font-size:${isFirst ? hlFs : Math.round(hlFs * 0.85)}px;` +
+        `font-weight:700;font-style:italic;color:${isFirst ? '#ffffff' : retroRed};` +
+        `text-transform:uppercase;line-height:0.95;text-align:center;` +
+        `text-shadow:${strokePx}px ${strokePx}px 0 ${retroBlack},` +
+        `-${strokePx}px ${strokePx}px 0 ${retroBlack},` +
+        `${strokePx}px -${strokePx}px 0 ${retroBlack},` +
+        `-${strokePx}px -${strokePx}px 0 ${retroBlack};` +
+        `margin-bottom:${Math.round(3*cs)}px;`;
+      pEl.textContent = part;
+      contentDiv.appendChild(pEl);
+    });
+
+    // Discount banner — dark band with large yellow text
+    const discFs  = Math.max(12, Math.round(22 * cs));
+    const discBand = document.createElement('div');
+    discBand.style.cssText =
+      `width:calc(100% + ${padX * 2}px);margin:${Math.round(10*cs)}px -${padX}px ${Math.round(6*cs)}px;` +
+      `background:${retroBlack};padding:${Math.round(7*cs)}px ${padX}px;` +
+      `text-align:center;position:relative;overflow:hidden;`;
+    // diagonal stripe accent on band
+    const dStripe = document.createElement('div');
+    dStripe.style.cssText =
+      `position:absolute;inset:0;` +
+      `background:repeating-linear-gradient(-45deg,transparent,transparent ${Math.round(6*scale)}px,rgba(255,255,255,0.04) ${Math.round(6*scale)}px,rgba(255,255,255,0.04) ${Math.round(12*scale)}px);`;
+    discBand.appendChild(dStripe);
+    const discEl2 = document.createElement('div');
+    discEl2.style.cssText =
+      `font-family:'Oswald',sans-serif;font-size:${discFs}px;font-weight:700;` +
+      `color:${retroYellow};text-transform:uppercase;letter-spacing:0.08em;` +
+      `position:relative;z-index:2;line-height:1;` +
+      `text-shadow:2px 2px 0 ${retroOrange};`;
+    discEl2.textContent = retroDiscount;
+    discBand.appendChild(discEl2);
+    contentDiv.appendChild(discBand);
+
+    // Services row
+    if (s.services && s.services.length > 0) {
+      const svcRow = document.createElement('div');
+      const svcFs  = Math.max(7, Math.round((s.svcSize || 11) * cs));
+      svcRow.style.cssText =
+        `display:flex;align-items:center;justify-content:center;flex-wrap:wrap;` +
+        `gap:${Math.round(3*cs)}px;margin-bottom:${Math.round(4*cs)}px;`;
+      s.services.forEach((name, i) => {
+        const sp = document.createElement('span');
+        sp.style.cssText =
+          `font-family:'Oswald',sans-serif;font-size:${svcFs}px;font-weight:700;` +
+          `color:${retroBlack};letter-spacing:0.12em;text-transform:uppercase;`;
+        sp.textContent = name;
+        svcRow.appendChild(sp);
+        if (i < s.services.length - 1) {
+          const dot = document.createElement('span');
+          dot.style.cssText =
+            `color:${retroRed};font-size:${svcFs}px;line-height:1;`;
+          dot.textContent = ' ✦ ';
+          svcRow.appendChild(dot);
+        }
+      });
+      contentDiv.appendChild(svcRow);
+    }
+
+    wrap.appendChild(contentDiv);
+
   }
 
   return wrap;
@@ -1458,7 +1657,8 @@ const accentDefaults = {
   dark: accentInput ? accentInput.value : '#c9963d',
   light: '#c8a96e',
   bold: '#cc2222',
-  'blank-slate': accentInput ? accentInput.value : '#c9963d'
+  'blank-slate': accentInput ? accentInput.value : '#c9963d',
+  'retro': '#1a6f8c'
 };
 const accentByStyle = { ...accentDefaults };
 
@@ -1487,6 +1687,7 @@ if (accentInput) {
 
 function updateSidebarForStyle(s) {
   const isBS   = s === 'blank-slate';
+  const isRetro = s === 'retro';
   const isDark = s === 'dark';
   const showAccent = s === 'dark' || s === 'bold';
   ['sb-overlay-dark','sb-wrap-overlay-mode','sb-wrap-content-scale',
@@ -1495,6 +1696,9 @@ function updateSidebarForStyle(s) {
     const el = document.getElementById(id);
     if (el) el.classList.toggle('sb-hidden', isBS);
   });
+  // Retro: hide overlay mode only (content scale still applies)
+  const omEl = document.getElementById('sb-wrap-overlay-mode');
+  if (omEl && isRetro) omEl.classList.add('sb-hidden');
   const accentRow = document.getElementById('sb-accent-row');
   if (accentRow) accentRow.classList.toggle('sb-hidden', !showAccent);
   // Corners + divider only exist in Dark & Refined
@@ -1502,10 +1706,13 @@ function updateSidebarForStyle(s) {
   if (cornersEl) cornersEl.classList.toggle('sb-hidden', !isDark);
   const bsTxtSec = document.getElementById('sb-wrap-blank-slate-text');
   if (bsTxtSec) bsTxtSec.classList.toggle('sb-hidden', !isBS);
+  const retroSec = document.getElementById('sb-wrap-retro');
+  if (retroSec) retroSec.classList.toggle('sb-hidden', !isRetro);
 }
 
 function updateModalForStyle(s) {
   const isBS   = s === 'blank-slate';
+  const isRetro = s === 'retro';
   const isDark = s === 'dark';
   ['m-wrap-overlay-dark','m-wrap-overlay-mode','m-wrap-content-scale',
    'm-wrap-copy','m-wrap-font-sizes','m-wrap-services'
@@ -1513,6 +1720,9 @@ function updateModalForStyle(s) {
     const el = document.getElementById(id);
     if (el) el.classList.toggle('sb-hidden', isBS);
   });
+  // Retro: hide overlay mode only (content scale still applies)
+  const mOmEl = document.getElementById('m-wrap-overlay-mode');
+  if (mOmEl && isRetro) mOmEl.classList.add('sb-hidden');
   // Corners + divider only exist in Dark & Refined
   ['m-tog-corners','m-tog-divider'].forEach(id => {
     const el = document.getElementById(id);
@@ -1524,6 +1734,8 @@ function updateModalForStyle(s) {
   });
   const bsMEl = document.getElementById('m-wrap-blank-slate');
   if (bsMEl) bsMEl.classList.toggle('sb-hidden', !isBS);
+  const retroMEl = document.getElementById('m-wrap-retro');
+  if (retroMEl) retroMEl.classList.toggle('sb-hidden', !isRetro);
 }
 
 function setOverlayMode(mode) {
@@ -1604,6 +1816,8 @@ function openModal(fmtId) {
   sv('m-bs2TextAlign', s.bs2TextAlign || 'center');
   sv('m-bs2TextY', s.bs2TextY||20);         mtxt('m-bs2TextY-val', bsSign(s.bs2TextY||20));
   sv('m-bs2TextRotate', s.bs2TextRotate||0);mtxt('m-bs2TextRotate-val', (s.bs2TextRotate||0)+'°');
+  // ── Patriotic per-format overrides ──
+  sv('m-patrioticDiscount', s.patrioticDiscount || '25% OFF EVERYTHING');
   document.getElementById('modal-reset').style.display=Object.keys(ov).length>0?'inline':'none';
   updateModalForStyle(s.layoutStyle || currentStyle);
   renderModalPreview();
@@ -1956,6 +2170,7 @@ function applyTemplate(i) {
   set('bs2ImgScale',   s.bs2ImgScale   ?? 60);
   set('bs2ImgY',       s.bs2ImgY       ?? 0);
   set('bs2ImgX',       s.bs2ImgX       ?? 0);
+  set('patrioticDiscount', s.patrioticDiscount ?? '25% OFF EVERYTHING');
 
   // Services checkboxes
   document.querySelectorAll('#services-grid input').forEach(cb => {
