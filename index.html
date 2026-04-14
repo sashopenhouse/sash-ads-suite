@@ -243,7 +243,7 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
 .light-swatch { background:linear-gradient(135deg,#f0ebe0 60%,#7a6a4a 100%); }
 .bold-swatch { background:linear-gradient(135deg,#1a1a2e 60%,#cc2222 100%); }
 .blank-slate-swatch { background:linear-gradient(135deg,#cc2222 55%,#ff5555 100%); }
-.retro-swatch { background:linear-gradient(135deg,#cc2222 40%,#8a0f0f 100%); }
+.retro-swatch { background:linear-gradient(135deg,#cc2222 38%,#1b3d6d 100%); }
 .style-opt-label { font-size:12px; color:var(--tx2); line-height:1.4; font-weight:500; }
 .style-opt-label span { font-size:10px; color:var(--tx3); font-weight:400; }
 .style-opt.active .style-opt-label { color:var(--tx); }
@@ -1454,174 +1454,340 @@ function buildPost(fmt, s, containerW) {
     }
 
   } else if (style === 'retro') {
-    // ── STYLE 5: Retro / Comic-Pop Sale ──
-    // Sunburst BG (yellow+orange rays + halftone dots), bold outlined headline,
-    // large discount, services strip, dark footer with contact info.
-    const retroYellow = '#cc2222';
-    const retroOrange = '#8a0f0f';
-    const retroRed    = '#ffffff';
-    const retroBlack  = '#1a1a1a';
+    // ── STYLE 5: Retro / Made-in-America Sale ──
+    const retroRed      = '#cc2222';
+    const retroDeepRed  = '#b41616';
+    const retroYellow   = '#f2b93b';
+    const retroNavy     = '#1b3d6d';
+    const retroCream    = '#f6e4c0';
+    const retroCream2   = '#f2d7a6';
+    const retroBlack    = '#1a1a1a';
+    const retroWhite    = '#ffffff';
 
     const retroDiscount = s.patrioticDiscount || '25% OFF EVERYTHING';
+    const contentYOffset = Math.round((s.contentY || 0) / 100 * H);
 
     // ── Kill default bg/tint — we paint everything ourselves ──
     bg.style.backgroundImage = 'none';
-    bg.style.background = 'transparent';
+    bg.style.background = retroCream;
     bg.style.transform = 'none';
     tint.style.background = 'transparent';
 
-    // ── Full-canvas sunburst layer ──
-    // Build conic-gradient with 20 alternating ray slices
-    const raySlice = 360 / 20;
+    const marqueeH  = Math.round(H * 0.05);
+    const headerH   = Math.round(H * 0.22);
+    const discountH = Math.round(H * 0.09);
+    const servicesH = Math.round(H * 0.21);
+    const whyH      = Math.round(H * 0.13);
+    const promoH    = Math.round(H * 0.16);
+    const ctaH      = Math.round(H * 0.10);
+    const bottomH   = Math.max(0, H - (marqueeH + headerH + discountH + servicesH + whyH + promoH + ctaH));
+
+    // ── Top marquee strip ──
+    const marquee = document.createElement('div');
+    marquee.style.cssText =
+      `position:absolute;top:0;left:0;width:${W}px;height:${marqueeH}px;` +
+      `background:${retroYellow};display:flex;align-items:center;justify-content:center;` +
+      `font-family:'Barlow',sans-serif;font-size:${Math.max(6, Math.round(7 * cs))}px;` +
+      `font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:${retroBlack};` +
+      `z-index:20;`;
+    const svcLine = (s.services && s.services.length)
+      ? s.services.join(' / ')
+      : 'Windows / Baths / Doors';
+    const marqueeItems = [
+      'Made in America',
+      retroDiscount,
+      svcLine,
+      'Serving CNY since 1989',
+      'Free Consultations'
+    ];
+    marquee.textContent = marqueeItems.join(' * ');
+    wrap.appendChild(marquee);
+
+    let y = marqueeH + contentYOffset;
+
+    // ── Header (sunburst) ──
+    const header = document.createElement('div');
+    header.style.cssText =
+      `position:absolute;top:${y}px;left:0;width:${W}px;height:${headerH}px;overflow:hidden;` +
+      `background:${retroRed};z-index:5;`;
+    const raySlice = 360 / 24;
     const stops = [];
-    for (let i = 0; i < 20; i++) {
-      const col = i % 2 === 0 ? retroYellow : retroOrange;
+    for (let i = 0; i < 24; i++) {
+      const col = i % 2 === 0 ? retroRed : retroDeepRed;
       stops.push(`${col} ${(i * raySlice).toFixed(1)}deg`);
       stops.push(`${col} ${((i + 1) * raySlice).toFixed(1)}deg`);
     }
-    const sunburstBg = document.createElement('div');
-    sunburstBg.style.cssText =
-      `position:absolute;inset:0;z-index:0;` +
-      `background:conic-gradient(from -9deg at 50% 48%, ${stops.join(',')});`;
-    wrap.appendChild(sunburstBg);
-
-    // ── Halftone radial-dot overlay ──
+    const sunburst = document.createElement('div');
+    sunburst.style.cssText =
+      `position:absolute;inset:-10% -10% 0 -10%;` +
+      `background:conic-gradient(from -8deg at 50% 60%, ${stops.join(',')});`;
+    header.appendChild(sunburst);
     const dotSzPx = Math.max(2, Math.round(5 * scale));
     const dotGap  = Math.max(4, Math.round(12 * scale));
-    const halftoneLay = document.createElement('div');
-    halftoneLay.style.cssText =
-      `position:absolute;inset:0;z-index:1;pointer-events:none;` +
-      `background-image:radial-gradient(circle,${retroOrange} ${dotSzPx}px,transparent ${dotSzPx}px);` +
-      `background-size:${dotGap}px ${dotGap}px;opacity:0.35;`;
-    wrap.appendChild(halftoneLay);
+    const halftone = document.createElement('div');
+    halftone.style.cssText =
+      `position:absolute;inset:0;opacity:0.28;` +
+      `background-image:radial-gradient(circle,rgba(0,0,0,0.25) ${dotSzPx}px,transparent ${dotSzPx}px);` +
+      `background-size:${dotGap}px ${dotGap}px;`;
+    header.appendChild(halftone);
 
-    // ── Radial glow in center (bright highlight) ──
-    const glowLay = document.createElement('div');
-    glowLay.style.cssText =
-      `position:absolute;inset:0;z-index:2;pointer-events:none;` +
-      `background:radial-gradient(ellipse 55% 45% at 50% 48%,rgba(255,200,200,0.45) 0%,transparent 70%);`;
-    wrap.appendChild(glowLay);
-
-    // ── Photo — upper half, cut in at an angle ──
-    const photoH = Math.round(H * 0.48);
-    if (s.photoUrl) {
-      const photoDiv = document.createElement('div');
-      photoDiv.style.cssText =
-        `position:absolute;top:0;left:0;width:${W}px;height:${photoH}px;` +
-        `background-image:url(${s.photoUrl});background-size:${(s.photoScale||100) > 100 ? s.photoScale+'%' : 'cover'};` +
-        `background-position:center ${s.photoY||30}%;background-repeat:no-repeat;` +
-        `z-index:3;clip-path:polygon(0 0,100% 0,100% 82%,0 100%);`;
-      // Slight dark vignette at bottom of photo to blend
-      const pVig = document.createElement('div');
-      pVig.style.cssText = `position:absolute;inset:0;background:linear-gradient(to bottom,transparent 50%,rgba(0,0,0,0.35) 100%);`;
-      photoDiv.appendChild(pVig);
-      wrap.appendChild(photoDiv);
-    }
-
-    // ── Logo ──
     if (s.showLogo !== false) {
       const logoH2  = Math.max(10, Math.round((s.logoSize || 28) * cs));
-      const logoPad = Math.round(14 * cs);
-      const lWrap   = document.createElement('div');
-      lWrap.style.cssText = `position:absolute;top:${logoPad}px;left:${logoPad}px;z-index:10;pointer-events:none;`;
+      const lWrap = document.createElement('div');
+      lWrap.style.cssText = `position:absolute;top:${Math.round(10*cs)}px;left:50%;transform:translateX(-50%);z-index:3;`;
       const lImg = document.createElement('img');
       lImg.src = LOGO_COLOR_SRC;
-      lImg.style.cssText = `height:${logoH2}px;width:auto;display:block;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.5));`;
+      lImg.style.cssText = `height:${logoH2}px;width:auto;display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.4));`;
       lWrap.appendChild(lImg);
-      wrap.appendChild(lWrap);
+      header.appendChild(lWrap);
     }
 
-    // ── Content block — position respects contentY slider ──
-    const contentYOffset = Math.round((s.contentY || 0) / 100 * H);
-    const contentTop = (s.photoUrl ? Math.round(H * 0.40) : Math.round(H * 0.12)) + contentYOffset;
-    const padX = Math.round(20 * cs);
-    const contentDiv = document.createElement('div');
-    contentDiv.style.cssText =
-      `position:absolute;top:${contentTop}px;left:${padX}px;right:${padX}px;` +
-      `display:flex;flex-direction:column;align-items:center;z-index:8;pointer-events:none;`;
-
-    // Eyebrow
-    if (s.showEyebrow !== false && s.eyebrow) {
-      const eyEl = document.createElement('div');
-      const eyFs = Math.max(6, Math.round((s.eyebrowSize || 9) * cs));
-      eyEl.style.cssText =
-        `font-family:'Barlow',sans-serif;font-size:${eyFs}px;font-weight:700;` +
-        `letter-spacing:0.28em;text-transform:uppercase;color:${retroBlack};` +
-        `background:${retroYellow};padding:${Math.round(2*cs)}px ${Math.round(10*cs)}px;` +
-        `margin-bottom:${Math.round(6*cs)}px;border:${Math.max(1,Math.round(2*cs))}px solid ${retroBlack};`;
-      eyEl.textContent = s.eyebrow;
-      contentDiv.appendChild(eyEl);
-    }
-
-    // Headline — bold outlined Oswald
-    const hlParts = s.headline.split('|').map(p => p.trim());
-    const hlFs = Math.max(14, Math.round(s.headlineSize * cs));
-    const strokePx = Math.max(1, Math.round(2.5 * cs));
+    const hlWrap = document.createElement('div');
+    hlWrap.style.cssText =
+      `position:absolute;left:0;right:0;top:${Math.round(42*cs)}px;` +
+      `text-align:center;z-index:4;`;
+    const hlParts = (s.headline || 'Made in America|Sale!').split('|').map(p => p.trim()).filter(Boolean);
+    const hlFs = Math.max(16, Math.round((s.headlineSize || 36) * cs));
     hlParts.forEach((part, idx) => {
       const pEl = document.createElement('div');
-      const isFirst = idx === 0;
+      const isSecond = idx === 1;
       pEl.style.cssText =
-        `font-family:'Oswald',sans-serif;font-size:${isFirst ? hlFs : Math.round(hlFs * 0.85)}px;` +
-        `font-weight:700;font-style:italic;color:${isFirst ? '#ffffff' : retroRed};` +
-        `text-transform:uppercase;line-height:0.95;text-align:center;` +
-        `text-shadow:${strokePx}px ${strokePx}px 0 ${retroBlack},` +
-        `-${strokePx}px ${strokePx}px 0 ${retroBlack},` +
-        `${strokePx}px -${strokePx}px 0 ${retroBlack},` +
-        `-${strokePx}px -${strokePx}px 0 ${retroBlack};` +
-        `margin-bottom:${Math.round(3*cs)}px;`;
+        `font-family:'Oswald',sans-serif;font-size:${isSecond ? Math.round(hlFs * 1.05) : hlFs}px;` +
+        `font-weight:700;letter-spacing:0.06em;text-transform:uppercase;` +
+        `color:${isSecond ? retroYellow : retroWhite};` +
+        `text-shadow:0 3px 0 rgba(0,0,0,0.2);line-height:0.95;`;
       pEl.textContent = part;
-      contentDiv.appendChild(pEl);
+      hlWrap.appendChild(pEl);
     });
+    header.appendChild(hlWrap);
+    wrap.appendChild(header);
+    y += headerH;
 
-    // Discount banner — dark band with large yellow text
-    const discFs  = Math.max(12, Math.round(22 * cs));
-    const discBand = document.createElement('div');
-    discBand.style.cssText =
-      `width:calc(100% + ${padX * 2}px);margin:${Math.round(10*cs)}px -${padX}px ${Math.round(6*cs)}px;` +
-      `background:${retroBlack};padding:${Math.round(7*cs)}px ${padX}px;` +
-      `text-align:center;position:relative;overflow:hidden;`;
-    // diagonal stripe accent on band
+    // ── Discount band ──
+    const discount = document.createElement('div');
+    discount.style.cssText =
+      `position:absolute;top:${y}px;left:0;width:${W}px;height:${discountH}px;` +
+      `background:${retroNavy};display:flex;flex-direction:column;` +
+      `align-items:center;justify-content:center;overflow:hidden;z-index:6;`;
     const dStripe = document.createElement('div');
     dStripe.style.cssText =
       `position:absolute;inset:0;` +
-      `background:repeating-linear-gradient(-45deg,transparent,transparent ${Math.round(6*scale)}px,rgba(255,255,255,0.04) ${Math.round(6*scale)}px,rgba(255,255,255,0.04) ${Math.round(12*scale)}px);`;
-    discBand.appendChild(dStripe);
-    const discEl2 = document.createElement('div');
-    discEl2.style.cssText =
-      `font-family:'Oswald',sans-serif;font-size:${discFs}px;font-weight:700;` +
-      `color:${retroYellow};text-transform:uppercase;letter-spacing:0.08em;` +
-      `position:relative;z-index:2;line-height:1;` +
-      `text-shadow:2px 2px 0 ${retroOrange};`;
-    discEl2.textContent = retroDiscount;
-    discBand.appendChild(discEl2);
-    contentDiv.appendChild(discBand);
+      `background:repeating-linear-gradient(-45deg,transparent,transparent ${Math.round(8*scale)}px,rgba(255,255,255,0.05) ${Math.round(8*scale)}px,rgba(255,255,255,0.05) ${Math.round(16*scale)}px);`;
+    discount.appendChild(dStripe);
+    const starRow = document.createElement('div');
+    starRow.style.cssText =
+      `font-family:'Barlow',sans-serif;font-size:${Math.max(6, Math.round(7*cs))}px;` +
+      `color:${retroYellow};letter-spacing:0.4em;text-align:center;` +
+      `position:relative;z-index:2;`;
+    starRow.textContent = '***************';
+    discount.appendChild(starRow);
+    const discText = document.createElement('div');
+    discText.style.cssText =
+      `font-family:'Oswald',sans-serif;font-size:${Math.max(12, Math.round(20*cs))}px;` +
+      `font-weight:700;color:${retroYellow};letter-spacing:0.08em;text-transform:uppercase;` +
+      `position:relative;z-index:2;line-height:1;`;
+    discText.textContent = retroDiscount;
+    discount.appendChild(discText);
+    const discl = document.createElement('div');
+    discl.style.cssText =
+      `font-family:'Barlow',sans-serif;font-size:${Math.max(5, Math.round(6*cs))}px;` +
+      `color:rgba(255,255,255,0.7);text-align:center;margin-top:${Math.round(2*cs)}px;` +
+      `position:relative;z-index:2;`;
+    discl.textContent = 'Offer expires soon. Cannot be combined with other offers.';
+    discount.appendChild(discl);
+    wrap.appendChild(discount);
+    y += discountH;
 
-    // Services row
-    if (s.services && s.services.length > 0) {
-      const svcRow = document.createElement('div');
-      const svcFs  = Math.max(7, Math.round((s.svcSize || 11) * cs));
-      svcRow.style.cssText =
-        `display:flex;align-items:center;justify-content:center;flex-wrap:wrap;` +
-        `gap:${Math.round(3*cs)}px;margin-bottom:${Math.round(4*cs)}px;`;
-      s.services.forEach((name, i) => {
-        const sp = document.createElement('span');
-        sp.style.cssText =
-          `font-family:'Oswald',sans-serif;font-size:${svcFs}px;font-weight:700;` +
-          `color:${retroBlack};letter-spacing:0.12em;text-transform:uppercase;`;
-        sp.textContent = name;
-        svcRow.appendChild(sp);
-        if (i < s.services.length - 1) {
-          const dot = document.createElement('span');
-          dot.style.cssText =
-            `color:${retroRed};font-size:${svcFs}px;line-height:1;`;
-          dot.textContent = ' ✦ ';
-          svcRow.appendChild(dot);
-        }
-      });
-      contentDiv.appendChild(svcRow);
+    // ── Services band ──
+    const services = document.createElement('div');
+    services.style.cssText =
+      `position:absolute;top:${y}px;left:0;width:${W}px;height:${servicesH}px;` +
+      `background:${retroCream};display:flex;flex-direction:column;` +
+      `align-items:center;justify-content:flex-start;z-index:5;`;
+    const servicesHead = document.createElement('div');
+    servicesHead.style.cssText =
+      `font-family:'Oswald',sans-serif;font-size:${Math.max(10, Math.round(16*cs))}px;` +
+      `font-weight:700;text-transform:uppercase;color:${retroBlack};` +
+      `letter-spacing:0.06em;margin-top:${Math.round(10*cs)}px;`;
+    servicesHead.textContent = (s.eyebrow || "America's Best - Installed in CNY!").toUpperCase();
+    services.appendChild(servicesHead);
+    const servicesSub = document.createElement('div');
+    servicesSub.style.cssText =
+      `font-family:'Barlow',sans-serif;font-size:${Math.max(6, Math.round(7*cs))}px;` +
+      `color:#9b2a1f;letter-spacing:0.08em;margin-top:${Math.round(2*cs)}px;`;
+    servicesSub.textContent = 'Quality products. Local craftsmanship. Unbeatable savings.';
+    services.appendChild(servicesSub);
+
+    const svcMap = {
+      Windows: ['Energy efficient replacements', 'Built & installed in CNY', 'Custom sizes and styles'],
+      Baths:   ['Fast bath installs', 'Tub-to-shower conversions', 'Walk-in and safety options'],
+      Doors:   ['Entry and patio doors', 'Steel, fiberglass and wood', 'Secure locking systems'],
+      Siding:  ['Vinyl and fiber cement', 'Color and style options', 'Insulated performance']
+    };
+    const svcNames = (s.services && s.services.length) ? s.services.slice(0, 3) : ['Windows','Baths','Doors'];
+    const cardRow = document.createElement('div');
+    cardRow.style.cssText =
+      `display:flex;gap:${Math.round(10*cs)}px;` +
+      `margin-top:${Math.round(10*cs)}px;` +
+      `padding:0 ${Math.round(16*cs)}px;` +
+      `width:100%;justify-content:center;`;
+    const cardColors = [retroRed, retroNavy, retroYellow];
+    svcNames.forEach((name, i) => {
+      const card = document.createElement('div');
+      card.style.cssText =
+        `flex:1;min-width:${Math.round(90*cs)}px;max-width:${Math.round(160*cs)}px;` +
+        `background:#f9edd0;border:${Math.max(1,Math.round(2*cs))}px solid ${retroBlack};` +
+        `border-radius:${Math.round(6*cs)}px;overflow:hidden;box-shadow:0 2px 0 rgba(0,0,0,0.2);`;
+      const cap = document.createElement('div');
+      cap.style.cssText =
+        `background:${cardColors[i % cardColors.length]};color:${i === 2 ? retroBlack : retroWhite};` +
+        `font-family:'Oswald',sans-serif;font-size:${Math.max(7, Math.round(9*cs))}px;` +
+        `font-weight:700;letter-spacing:0.08em;text-transform:uppercase;` +
+        `padding:${Math.round(6*cs)}px;text-align:center;`;
+      cap.textContent = name;
+      card.appendChild(cap);
+      const body = document.createElement('div');
+      body.style.cssText =
+        `padding:${Math.round(8*cs)}px ${Math.round(10*cs)}px;` +
+        `font-family:'Barlow',sans-serif;font-size:${Math.max(6, Math.round(7*cs))}px;` +
+        `color:${retroBlack};line-height:1.2;`;
+      const bullets = svcMap[name] || ['Custom options', 'Expert installation', 'Local service'];
+      body.innerHTML = bullets.map(b => `• ${b}`).join('<br>');
+      card.appendChild(body);
+      cardRow.appendChild(card);
+    });
+    services.appendChild(cardRow);
+    wrap.appendChild(services);
+    y += servicesH;
+
+    // ── Why band ──
+    const why = document.createElement('div');
+    why.style.cssText =
+      `position:absolute;top:${y}px;left:0;width:${W}px;height:${whyH}px;` +
+      `background:linear-gradient(180deg,${retroRed},${retroDeepRed});` +
+      `display:flex;flex-direction:column;align-items:center;justify-content:center;` +
+      `z-index:6;`;
+    const whyTitle = document.createElement('div');
+    whyTitle.style.cssText =
+      `font-family:'Oswald',sans-serif;font-size:${Math.max(10, Math.round(14*cs))}px;` +
+      `font-weight:700;text-transform:uppercase;color:${retroWhite};letter-spacing:0.08em;` +
+      `margin-bottom:${Math.round(8*cs)}px;`;
+    whyTitle.textContent = 'Why New York Sash?';
+    why.appendChild(whyTitle);
+
+    const whyRow = document.createElement('div');
+    whyRow.style.cssText =
+      `display:flex;gap:${Math.round(8*cs)}px;` +
+      `padding:0 ${Math.round(16*cs)}px;width:100%;justify-content:center;`;
+    const whyItems = [
+      { t: '35+', s: 'Years Serving CNY' },
+      { t: 'US', s: 'American Made' },
+      { t: '*', s: 'Expert Install' },
+      { t: '$0', s: 'Free Consult' }
+    ];
+    whyItems.forEach(item => {
+      const w = document.createElement('div');
+      w.style.cssText =
+        `background:${retroCream};border:${Math.max(1,Math.round(2*cs))}px solid ${retroBlack};` +
+        `border-radius:${Math.round(6*cs)}px;` +
+        `padding:${Math.round(6*cs)}px ${Math.round(10*cs)}px;` +
+        `min-width:${Math.round(60*cs)}px;text-align:center;`;
+      const wt = document.createElement('div');
+      wt.style.cssText =
+        `font-family:'Oswald',sans-serif;font-size:${Math.max(10, Math.round(13*cs))}px;` +
+        `font-weight:700;color:${retroRed};line-height:1;`;
+      wt.textContent = item.t;
+      const ws = document.createElement('div');
+      ws.style.cssText =
+        `font-family:'Barlow',sans-serif;font-size:${Math.max(5, Math.round(6*cs))}px;` +
+        `color:${retroBlack};margin-top:${Math.round(2*cs)}px;`;
+      ws.textContent = item.s;
+      w.appendChild(wt);
+      w.appendChild(ws);
+      whyRow.appendChild(w);
+    });
+    why.appendChild(whyRow);
+    wrap.appendChild(why);
+    y += whyH;
+
+    // ── Promo band ──
+    const promo = document.createElement('div');
+    promo.style.cssText =
+      `position:absolute;top:${y}px;left:0;width:${W}px;height:${promoH}px;` +
+      `background:${retroNavy};display:flex;align-items:center;` +
+      `padding:${Math.round(12*cs)}px ${Math.round(18*cs)}px;gap:${Math.round(16*cs)}px;` +
+      `z-index:6;`;
+    const promoDots = document.createElement('div');
+    promoDots.style.cssText =
+      `position:absolute;inset:0;` +
+      `background-image:radial-gradient(circle,rgba(255,255,255,0.08) 1px,transparent 1px);` +
+      `background-size:${Math.round(8*scale)}px ${Math.round(8*scale)}px;opacity:0.6;`;
+    promo.appendChild(promoDots);
+    const badge = document.createElement('div');
+    badge.style.cssText =
+      `position:relative;z-index:2;` +
+      `width:${Math.round(70*cs)}px;height:${Math.round(70*cs)}px;` +
+      `background:${retroYellow};border:${Math.max(2,Math.round(3*cs))}px solid ${retroRed};` +
+      `border-radius:${Math.round(8*cs)}px;display:flex;flex-direction:column;` +
+      `align-items:center;justify-content:center;text-align:center;`;
+    badge.innerHTML =
+      `<div style="font-family:'Barlow',sans-serif;font-size:${Math.max(5,Math.round(6*cs))}px;letter-spacing:0.1em;text-transform:uppercase;">Limited Time</div>` +
+      `<div style="font-family:'Oswald',sans-serif;font-size:${Math.max(10,Math.round(14*cs))}px;font-weight:700;">${retroDiscount.replace(/\s.*$/,'')}</div>` +
+      `<div style="font-family:'Barlow',sans-serif;font-size:${Math.max(5,Math.round(6*cs))}px;letter-spacing:0.08em;">Off!</div>`;
+    promo.appendChild(badge);
+    const promoText = document.createElement('div');
+    promoText.style.cssText = `position:relative;z-index:2;color:${retroWhite};`;
+    promoText.innerHTML =
+      `<div style="font-family:'Oswald',sans-serif;font-size:${Math.max(12,Math.round(16*cs))}px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;">Free Consultation<br>${retroDiscount}</div>` +
+      `<div style="font-family:'Barlow',sans-serif;font-size:${Math.max(6,Math.round(7*cs))}px;margin-top:${Math.round(4*cs)}px;opacity:0.85;">This is the biggest sale of the year for Central New York homeowners.</div>` +
+      `<div style="font-family:'Barlow',sans-serif;font-size:${Math.max(6,Math.round(7*cs))}px;margin-top:${Math.round(4*cs)}px;opacity:0.85;">${s.ctaText || 'Schedule a free consultation today.'}</div>`;
+    promo.appendChild(promoText);
+    wrap.appendChild(promo);
+    y += promoH;
+
+    // ── CTA band ──
+    const cta = document.createElement('div');
+    cta.style.cssText =
+      `position:absolute;top:${y}px;left:0;width:${W}px;height:${ctaH}px;` +
+      `background:${retroCream2};display:flex;align-items:center;justify-content:center;z-index:6;`;
+    const ctaBox = document.createElement('div');
+    ctaBox.style.cssText =
+      `background:${retroRed};color:${retroWhite};` +
+      `padding:${Math.round(10*cs)}px ${Math.round(16*cs)}px;` +
+      `border-radius:${Math.round(10*cs)}px;text-align:center;` +
+      `border:${Math.max(2,Math.round(3*cs))}px solid ${retroBlack};` +
+      `box-shadow:0 3px 0 rgba(0,0,0,0.25);min-width:${Math.round(200*cs)}px;`;
+    const phone = document.createElement('div');
+    phone.style.cssText =
+      `font-family:'Oswald',sans-serif;font-size:${Math.max(12,Math.round(18*cs))}px;` +
+      `font-weight:700;letter-spacing:0.04em;`;
+    phone.textContent = '315.624.7344';
+    ctaBox.appendChild(phone);
+    const ctaBtn = document.createElement('div');
+    ctaBtn.style.cssText =
+      `display:inline-block;margin-top:${Math.round(6*cs)}px;` +
+      `background:${retroYellow};color:${retroBlack};` +
+      `font-family:'Oswald',sans-serif;font-size:${Math.max(7,Math.round(9*cs))}px;` +
+      `font-weight:700;letter-spacing:0.1em;text-transform:uppercase;` +
+      `padding:${Math.round(5*cs)}px ${Math.round(12*cs)}px;border-radius:${Math.round(8*cs)}px;` +
+      `border:${Math.max(1,Math.round(2*cs))}px solid ${retroBlack};`;
+    ctaBtn.textContent = (s.ctaText || 'Get My Free Quote');
+    ctaBox.appendChild(ctaBtn);
+    cta.appendChild(ctaBox);
+    wrap.appendChild(cta);
+    y += ctaH;
+
+    // ── Bottom strip ──
+    if (bottomH > 0) {
+      const bottom = document.createElement('div');
+      bottom.style.cssText =
+        `position:absolute;top:${y}px;left:0;width:${W}px;height:${bottomH}px;` +
+        `background:${retroYellow};display:flex;align-items:center;justify-content:center;` +
+        `font-family:'Barlow',sans-serif;font-size:${Math.max(5, Math.round(6*cs))}px;` +
+        `letter-spacing:0.18em;text-transform:uppercase;color:${retroBlack};`;
+      bottom.textContent = 'Support American manufacturing * Support local jobs and families * Quality installation and craftsmanship';
+      wrap.appendChild(bottom);
     }
-
-    wrap.appendChild(contentDiv);
 
   }
 
