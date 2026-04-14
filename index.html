@@ -112,343 +112,173 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
 .btn-export-all {
   display:block; width:100%; padding:12px;
   background:var(--pb); color:var(--pbt);
-  font-weight:600; font-size:11px; letter-spacing:0.1em; text-transform:uppercase;
-  border:none; border-radius:8px; cursor:pointer;
-  font-family:'Inter',sans-serif; transition:opacity 0.15s;
-}
-.btn-export-all:hover { opacity:0.82; }
-.btn-export-all:disabled { opacity:0.3; cursor:not-allowed; }
-#progress-wrap { display:none; margin-top:8px; }
-#progress-bar-outer { background:var(--s3); border-radius:4px; height:3px; overflow:hidden; }
-#progress-bar { height:100%; background:var(--ac); width:0; transition:width 0.2s; border-radius:4px; }
-#progress-label { font-size:10px; color:var(--tx3); margin-top:6px; }
+  } else if (style === 'retro') {
+    // ── STYLE 5: Retro / Made-in-America Sale (minimal) ──
+    const retroRed      = '#cc2222';
+    const retroDeepRed  = '#b41616';
+    const retroYellow   = '#f2b93b';
+    const retroNavy     = '#1b3d6d';
+    const retroCream    = '#f6e4c0';
+    const retroCream2   = '#f2d7a6';
+    const retroBlack    = '#1a1a1a';
+    const retroWhite    = '#ffffff';
 
-#main { flex:1; padding:28px 32px; overflow-y:auto; background:var(--bg); }
-#main > p { font-size:12px; color:var(--tx3); margin-bottom:24px; }
-#main > p strong { color:var(--ac); font-weight:600; font-style:normal; }
-.formats-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
+    const retroDiscount = s.patrioticDiscount || '25% OFF EVERYTHING';
+    const contentYOffset = Math.round((s.contentY || 0) / 100 * H);
 
-.format-card { background:var(--s0); border:1px solid var(--ln); border-radius:10px; overflow:hidden; transition:border-color 0.15s; }
-.format-card.active-edit { border-color:var(--ac); }
-.format-card-header { padding:10px 14px; border-bottom:1px solid var(--ln); display:flex; align-items:center; justify-content:space-between; gap:8px; }
-.fch-left h3 { font-size:12px; font-weight:600; color:var(--tx); letter-spacing:-0.01em; }
-.fch-left span { font-size:10px; color:var(--tx3); }
-.fch-right { display:flex; gap:5px; align-items:center; }
-.btn-sm {
-  font-size:10px; font-weight:500; letter-spacing:0.06em; text-transform:uppercase;
-  padding:4px 10px; border-radius:5px; cursor:pointer;
-  font-family:'Inter',sans-serif; transition:all 0.15s;
-  border:1px solid var(--ln); background:transparent; color:var(--tx2); white-space:nowrap;
-}
-.btn-sm:hover { border-color:var(--tx3); color:var(--tx); }
-.btn-sm.active { border-color:var(--ac); color:var(--pbt); background:var(--pb); }
+    // ── Kill default bg/tint — we paint everything ourselves ──
+    bg.style.backgroundImage = 'none';
+    bg.style.background = retroCream;
+    bg.style.transform = 'none';
+    tint.style.background = 'transparent';
 
-.format-preview-wrap { padding:16px; display:flex; align-items:center; justify-content:center; background:var(--bg); min-height:120px; }
+    const headerH   = Math.round(H * 0.30);
+    const discountH = Math.round(H * 0.16);
+    const servicesH = Math.round(H * 0.08);
+    const ctaH      = Math.round(H * 0.22);
+    const bottomH   = Math.max(0, H - (headerH + discountH + servicesH + ctaH));
 
-.format-overrides { display:none; padding:14px; background:var(--s1); border-top:1px solid var(--ln); flex-direction:column; gap:11px; }
-.format-overrides.open { display:flex; }
-.ov-section-head { display:flex; align-items:center; justify-content:space-between; }
-.ov-label { font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--tx3); font-weight:500; }
-.btn-reset { font-size:10px; color:var(--tx3); background:none; border:none; cursor:pointer; letter-spacing:0.08em; transition:color 0.15s; padding:0; font-family:'Inter',sans-serif; }
-.btn-reset:hover { color:var(--ac); }
-.ov-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-.ov-field { display:flex; flex-direction:column; gap:4px; }
-.ov-field label { font-size:11px; color:var(--tx2); margin:0; }
-.ov-range-row { display:flex; align-items:center; gap:6px; }
-.ov-range-row input[type="range"] { flex:1; accent-color:var(--ac); }
-.ov-range-val { font-size:10px; color:var(--ac); min-width:30px; text-align:right; font-variant-numeric:tabular-nums; }
-.ov-toggles { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; }
-.ov-tog { display:flex; align-items:center; justify-content:space-between; font-size:11px; color:var(--tx2); padding:5px 7px; border:1px solid var(--ln); border-radius:5px; }
-.ov-tog input { width:13px; height:13px; accent-color:var(--ac); }
-.btn-export-fmt {
-  width:100%; padding:8px; font-size:10px; font-weight:500;
-  letter-spacing:0.1em; text-transform:uppercase;
-  border:1px solid var(--ln); background:transparent; color:var(--tx2);
-  border-radius:6px; cursor:pointer; font-family:'Inter',sans-serif;
-  transition:all 0.15s; margin-top:2px;
-}
-.btn-export-fmt:hover { border-color:var(--tx3); color:var(--tx); }
+    let y = contentYOffset;
 
-/* ── CUSTOMIZE MODAL ── */
-#customize-modal {
-  display:none; position:fixed; inset:0; z-index:1000;
-  background:rgba(0,0,0,0.75); backdrop-filter:blur(10px);
-  align-items:center; justify-content:center;
-}
-#customize-modal.open { display:flex; }
-#modal-inner {
-  background:var(--s0); border:1px solid var(--ln); border-radius:12px;
-  width:94vw; max-width:1100px; height:88vh; display:flex; flex-direction:column; overflow:hidden; min-height:0;
-}
-#modal-header {
-  padding:16px 22px; border-bottom:1px solid var(--ln);
-  display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
-}
-#modal-title { font-size:15px; font-weight:700; color:var(--tx); letter-spacing:-0.02em; }
-#modal-subtitle { font-size:11px; color:var(--tx3); margin-top:2px; }
-#modal-close {
-  font-size:16px; color:var(--tx3); background:var(--s2); border:1px solid var(--ln);
-  cursor:pointer; line-height:1; padding:6px 10px; border-radius:6px; transition:all 0.15s;
-}
-#modal-close:hover { color:var(--tx); border-color:var(--tx3); }
-#modal-body { display:flex; flex:1; overflow:hidden; min-height:0; }
-#modal-preview {
-  flex:1; background:var(--bg); display:flex; align-items:center; justify-content:center;
-  padding:24px; overflow:hidden; position:relative; min-width:0; min-height:0;
-}
-#modal-preview-inner { display:flex; align-items:center; justify-content:center; width:100%; height:100%; min-height:0; }
-#modal-controls {
-  width:320px; min-width:320px; background:var(--s1); border-left:1px solid var(--ln);
-  padding:20px 18px; overflow-y:auto; display:flex; flex-direction:column; gap:14px;
-}
-#modal-controls .ov-label { font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:var(--tx3); font-weight:500; margin-bottom:2px; display:block; }
-#modal-controls label { font-size:12px; color:var(--tx2); display:block; margin-bottom:2px; }
-#modal-controls input[type="text"], #modal-controls select {
-  width:100%; background:var(--s2); border:1px solid var(--ln); color:var(--tx);
-  font-family:'Inter',sans-serif; font-size:12px; padding:8px 10px;
-  border-radius:6px; outline:none; transition:border-color 0.15s;
-}
-#modal-controls input[type="text"]:focus, #modal-controls select:focus { border-color:var(--ac); }
-#modal-controls input[type="range"] { width:100%; accent-color:var(--ac); }
-#modal-controls .range-row { display:flex; align-items:center; gap:8px; }
-#modal-controls .range-row input { flex:1; }
-#modal-controls .range-val { font-size:11px; color:var(--ac); min-width:36px; text-align:right; font-variant-numeric:tabular-nums; }
-#modal-controls hr { border:none; border-top:1px solid var(--ln); }
-.modal-toggle-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; }
-.modal-tog { display:flex; align-items:center; justify-content:space-between; font-size:11px; color:var(--tx2); padding:6px 8px; border:1px solid var(--ln); border-radius:5px; }
-.modal-tog input { width:13px; height:13px; accent-color:var(--ac); }
-#modal-reset { font-size:10px; color:var(--tx3); background:none; border:none; cursor:pointer; letter-spacing:0.08em; transition:color 0.15s; padding:0; font-family:'Inter',sans-serif; }
-#modal-reset:hover { color:var(--ac); }
-.modal-footer { padding:14px 22px; border-top:1px solid var(--ln); display:flex; gap:8px; justify-content:flex-end; flex-shrink:0; }
-.modal-btn-export {
-  padding:9px 22px; background:var(--pb); color:var(--pbt);
-  font-weight:600; font-size:10px; letter-spacing:0.1em; text-transform:uppercase;
-  border:none; border-radius:7px; cursor:pointer; font-family:'Inter',sans-serif; transition:opacity 0.15s;
-}
-.modal-btn-export:hover { opacity:0.82; }
-.modal-btn-done {
-  padding:9px 22px; background:transparent; color:var(--tx2);
-  font-weight:500; font-size:10px; letter-spacing:0.1em; text-transform:uppercase;
-  border:1px solid var(--ln); border-radius:7px; cursor:pointer;
-  font-family:'Inter',sans-serif; transition:all 0.15s;
-}
-.modal-btn-done:hover { border-color:var(--tx3); color:var(--tx); }
+    // ── Header (sunburst) ──
+    const header = document.createElement('div');
+    header.style.cssText =
+      `position:absolute;top:${y}px;left:0;width:${W}px;height:${headerH}px;overflow:hidden;` +
+      `background:${retroRed};z-index:5;`;
+    const raySlice = 360 / 24;
+    const stops = [];
+    for (let i = 0; i < 24; i++) {
+      const col = i % 2 === 0 ? retroRed : retroDeepRed;
+      stops.push(`${col} ${(i * raySlice).toFixed(1)}deg`);
+      stops.push(`${col} ${((i + 1) * raySlice).toFixed(1)}deg`);
+    }
+    const sunburst = document.createElement('div');
+    sunburst.style.cssText =
+      `position:absolute;inset:-10% -10% 0 -10%;` +
+      `background:conic-gradient(from -8deg at 50% 60%, ${stops.join(',')});`;
+    header.appendChild(sunburst);
+    const dotSzPx = Math.max(2, Math.round(5 * scale));
+    const dotGap  = Math.max(4, Math.round(12 * scale));
+    const halftone = document.createElement('div');
+    halftone.style.cssText =
+      `position:absolute;inset:0;opacity:0.28;` +
+      `background-image:radial-gradient(circle,rgba(0,0,0,0.25) ${dotSzPx}px,transparent ${dotSzPx}px);` +
+      `background-size:${dotGap}px ${dotGap}px;`;
+    header.appendChild(halftone);
 
-.style-picker { display:flex; flex-direction:column; gap:5px; }
-.style-opt { display:flex; align-items:center; gap:10px; padding:9px 11px; border:1px solid var(--ln); border-radius:8px; cursor:pointer; transition:all 0.15s; background:var(--s1); }
-.style-opt:hover { border-color:var(--tx3); }
-.style-opt.active { border-color:var(--ac); background:var(--s2); }
-.style-swatch { width:30px; height:30px; border-radius:5px; flex-shrink:0; }
-.dark-swatch { background:linear-gradient(135deg,#0e1e36 60%,#ae8d4d 100%); }
-.light-swatch { background:linear-gradient(135deg,#f0ebe0 60%,#7a6a4a 100%); }
-.bold-swatch { background:linear-gradient(135deg,#1a1a2e 60%,#cc2222 100%); }
-.blank-slate-swatch { background:linear-gradient(135deg,#cc2222 55%,#ff5555 100%); }
-.retro-swatch { background:linear-gradient(135deg,#cc2222 38%,#1b3d6d 100%); }
-.style-opt-label { font-size:12px; color:var(--tx2); line-height:1.4; font-weight:500; }
-.style-opt-label span { font-size:10px; color:var(--tx3); font-weight:400; }
-.style-opt.active .style-opt-label { color:var(--tx); }
+    if (s.showLogo !== false) {
+      const logoH2  = Math.max(10, Math.round((s.logoSize || 28) * cs));
+      const lWrap = document.createElement('div');
+      lWrap.style.cssText = `position:absolute;top:${Math.round(10*cs)}px;left:50%;transform:translateX(-50%);z-index:3;`;
+      const lImg = document.createElement('img');
+      lImg.src = LOGO_COLOR_SRC;
+      lImg.style.cssText = `height:${logoH2}px;width:auto;display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.4));`;
+      lWrap.appendChild(lImg);
+      header.appendChild(lWrap);
+    }
 
-.sb-hidden { display:none !important; }
-.bs-panel { border-bottom:1px solid var(--ln); }
-.bs-acc-header { display:flex; justify-content:space-between; align-items:center; cursor:pointer; padding:9px 0 6px; font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--tx2); user-select:none; }
-.bs-acc-header::after { content:'▾'; font-size:10px; color:var(--tx3); transition:transform 0.15s; flex-shrink:0; }
-.bs-acc-header.collapsed::after { transform:rotate(-90deg); }
-.bs-acc-body { padding-bottom:6px; }
-.bs-acc-body.collapsed { display:none; }
+    const hlWrap = document.createElement('div');
+    hlWrap.style.cssText =
+      `position:absolute;left:0;right:0;top:${Math.round(50*cs)}px;` +
+      `text-align:center;z-index:4;`;
+    const hlParts = (s.headline || 'Made in America|Sale!').split('|').map(p => p.trim()).filter(Boolean);
+    const hlFs = Math.max(16, Math.round((s.headlineSize || 36) * cs));
+    hlParts.forEach((part, idx) => {
+      const pEl = document.createElement('div');
+      const isSecond = idx === 1;
+      pEl.style.cssText =
+        `font-family:'Oswald',sans-serif;font-size:${isSecond ? Math.round(hlFs * 1.05) : hlFs}px;` +
+        `font-weight:700;letter-spacing:0.06em;text-transform:uppercase;` +
+        `color:${isSecond ? retroYellow : retroWhite};` +
+        `text-shadow:0 3px 0 rgba(0,0,0,0.2);line-height:0.95;`;
+      pEl.textContent = part;
+      hlWrap.appendChild(pEl);
+    });
+    header.appendChild(hlWrap);
+    wrap.appendChild(header);
+    y += headerH;
 
-.overlay-mode-toggle { display:flex; gap:5px; }
-.om-btn { flex:1; padding:7px 0; font-size:11px; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; font-family:'Inter',sans-serif; border:1px solid var(--ln); border-radius:6px; background:transparent; color:var(--tx2); cursor:pointer; transition:all 0.15s; }
-.om-btn:hover { border-color:var(--tx3); color:var(--tx); }
-.om-btn.active { border-color:var(--ac); color:var(--tx); background:var(--s2); }
+    // ── Discount band ──
+    const discount = document.createElement('div');
+    discount.style.cssText =
+      `position:absolute;top:${y}px;left:0;width:${W}px;height:${discountH}px;` +
+      `background:${retroNavy};display:flex;flex-direction:column;` +
+      `align-items:center;justify-content:center;overflow:hidden;z-index:6;`;
+    const dStripe = document.createElement('div');
+    dStripe.style.cssText =
+      `position:absolute;inset:0;` +
+      `background:repeating-linear-gradient(-45deg,transparent,transparent ${Math.round(8*scale)}px,rgba(255,255,255,0.05) ${Math.round(8*scale)}px,rgba(255,255,255,0.05) ${Math.round(16*scale)}px);`;
+    discount.appendChild(dStripe);
+    const discText = document.createElement('div');
+    discText.style.cssText =
+      `font-family:'Oswald',sans-serif;font-size:${Math.max(12, Math.round(22*cs))}px;` +
+      `font-weight:700;color:${retroYellow};letter-spacing:0.08em;text-transform:uppercase;` +
+      `position:relative;z-index:2;line-height:1;`;
+    discText.textContent = retroDiscount;
+    discount.appendChild(discText);
+    wrap.appendChild(discount);
+    y += discountH;
 
-.mc-section { display:flex; flex-direction:column; gap:7px; }
-.mc-section-head { font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:var(--tx3); font-weight:500; margin-bottom:2px; }
-.mc-services-grid { display:grid; grid-template-columns:1fr 1fr; gap:5px; }
-.mc-svc-tog { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--tx2); cursor:pointer; padding:5px 8px; border:1px solid var(--ln); border-radius:6px; background:var(--s2); user-select:none; transition:all 0.15s; }
-.mc-svc-tog input { width:12px; height:12px; accent-color:var(--ac); flex-shrink:0; }
-.mc-svc-tog:has(input:checked) { border-color:var(--ac); color:var(--tx); }
+    // ── Services single line ──
+    const services = document.createElement('div');
+    services.style.cssText =
+      `position:absolute;top:${y}px;left:0;width:${W}px;height:${servicesH}px;` +
+      `background:${retroCream};display:flex;align-items:center;justify-content:center;` +
+      `z-index:5;`;
+    const svcLine = (s.services && s.services.length)
+      ? s.services.join(' • ').toUpperCase()
+      : 'WINDOWS • BATHS • DOORS';
+    const svcText = document.createElement('div');
+    svcText.style.cssText =
+      `font-family:'Oswald',sans-serif;font-size:${Math.max(8, Math.round(10*cs))}px;` +
+      `font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:${retroBlack};`;
+    svcText.textContent = svcLine;
+    services.appendChild(svcText);
+    wrap.appendChild(services);
+    y += servicesH;
 
-/* ── Templates ───────────────────────────────────── */
-#tpl-list { display:flex; flex-direction:column; gap:4px; margin-top:4px; }
-.tpl-empty { font-size:11px; color:var(--tx3); padding:4px 0; }
-.tpl-item { display:flex; align-items:center; gap:6px; background:var(--s2); border:1px solid var(--ln); border-radius:6px; padding:6px 10px; transition:all 0.15s; }
-.tpl-item:hover { border-color:var(--tx3); }
-.tpl-name { flex:1; font-size:12px; color:var(--tx); cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:500; }
-.tpl-name:hover { color:var(--ac); }
-.tpl-del { background:none; border:none; color:var(--tx3); font-size:11px; cursor:pointer; padding:2px 5px; border-radius:3px; line-height:1; flex-shrink:0; transition:color 0.15s; }
-.tpl-del:hover { color:#e05555; }
-.tpl-save-row { display:flex; gap:6px; }
-.tpl-save-row input { flex:1; min-width:0; }
-.btn-tpl-save { font-size:10px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; padding:7px 12px; border-radius:6px; cursor:pointer; font-family:'Inter',sans-serif; border:1px solid var(--ln); background:var(--s2); color:var(--tx2); white-space:nowrap; transition:all 0.15s; }
-.btn-tpl-save:hover { border-color:var(--tx3); color:var(--tx); }
+    // ── CTA band ──
+    const cta = document.createElement('div');
+    cta.style.cssText =
+      `position:absolute;top:${y}px;left:0;width:${W}px;height:${ctaH}px;` +
+      `background:${retroCream2};display:flex;align-items:center;justify-content:center;z-index:6;`;
+    const ctaBox = document.createElement('div');
+    ctaBox.style.cssText =
+      `background:${retroRed};color:${retroWhite};` +
+      `padding:${Math.round(10*cs)}px ${Math.round(16*cs)}px;` +
+      `border-radius:${Math.round(10*cs)}px;text-align:center;` +
+      `border:${Math.max(2,Math.round(3*cs))}px solid ${retroBlack};` +
+      `box-shadow:0 3px 0 rgba(0,0,0,0.25);min-width:${Math.round(200*cs)}px;`;
+    const phone = document.createElement('div');
+    phone.style.cssText =
+      `font-family:'Oswald',sans-serif;font-size:${Math.max(12,Math.round(18*cs))}px;` +
+      `font-weight:700;letter-spacing:0.04em;`;
+    phone.textContent = '315.624.7344';
+    ctaBox.appendChild(phone);
+    const ctaBtn = document.createElement('div');
+    ctaBtn.style.cssText =
+      `display:inline-block;margin-top:${Math.round(6*cs)}px;` +
+      `background:${retroYellow};color:${retroBlack};` +
+      `font-family:'Oswald',sans-serif;font-size:${Math.max(7,Math.round(9*cs))}px;` +
+      `font-weight:700;letter-spacing:0.1em;text-transform:uppercase;` +
+      `padding:${Math.round(5*cs)}px ${Math.round(12*cs)}px;border-radius:${Math.round(8*cs)}px;` +
+      `border:${Math.max(1,Math.round(2*cs))}px solid ${retroBlack};`;
+    ctaBtn.textContent = (s.ctaText || 'Get My Free Quote');
+    ctaBox.appendChild(ctaBtn);
+    cta.appendChild(ctaBox);
+    wrap.appendChild(cta);
+    y += ctaH;
 
-/* ── Ad rendering — DO NOT CHANGE (affects export) ── */
-.post-canvas-wrap { position:relative; overflow:hidden; flex-shrink:0; }
-.photo-bg-layer { position:absolute; inset:0; background-size:cover; }
-.tint-layer { position:absolute; inset:0; }
-.content-layer { position:absolute; bottom:0; left:0; right:0; text-align:center; pointer-events:none; }
-.eyebrow-el { font-weight:300; letter-spacing:0.3em; text-transform:uppercase; display:block; }
-.headline-el { font-family:'Playfair Display',serif; font-weight:400; color:#f5eedf; line-height:1.15; }
-.services-el { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; }
-.svc-item-el { font-weight:400; letter-spacing:0.18em; text-transform:uppercase; color:#c8b98a; }
-.svc-dot-el { border-radius:50%; opacity:0.8; flex-shrink:0; }
-.divider-el { display:flex; align-items:center; justify-content:center; }
-.div-line-el { height:0.5px; opacity:0.5; }
-.div-diamond-el { transform:rotate(45deg); opacity:0.8; }
-.cta-el { display:inline-block; font-weight:500; letter-spacing:0.22em; text-transform:uppercase; color:#0b1928; }
-</style>
-</head>
-<body>
+    // ── Bottom spacer ──
+    if (bottomH > 0) {
+      const bottom = document.createElement('div');
+      bottom.style.cssText =
+        `position:absolute;top:${y}px;left:0;width:${W}px;height:${bottomH}px;` +
+        `background:${retroCream2};`;
+      wrap.appendChild(bottom);
+    }
 
-<div id="sidebar">
-  <div class="sidebar-head">
-    <div class="sidebar-brand">
-      <span class="sidebar-brand-sub">New York Sash</span>
-      <span class="sidebar-brand-title">Ad Suite</span>
-    </div>
-    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle light / dark">&#9788;</button>
-  </div>
-  <div class="sidebar-body">
-  <div>
-    <span class="section-label">Photo</span>
-    <div class="field-group">
-      <div class="upload-btn" onclick="document.getElementById('fileInput').click()">+ Upload Image</div>
-      <input type="file" id="fileInput" accept="image/*">
-      <label>Vertical position</label>
-      <div class="range-row">
-        <input type="range" id="photoY" min="0" max="100" value="30">
-        <span class="range-val" id="photoYVal">30%</span>
-      </div>
-      <label>Scale</label>
-      <div class="range-row">
-        <input type="range" id="photoScale" min="50" max="250" value="100" step="1">
-        <span class="range-val" id="photoScaleVal">100%</span>
-      </div>
-      <div id="sb-overlay-dark">
-      <label>Overlay darkness</label>
-      <div class="range-row">
-        <input type="range" id="overlayDark" min="0" max="90" value="55">
-        <span class="range-val" id="overlayDarkVal">55%</span>
-      </div>
-      </div>
-    </div>
-  </div>
-
-
-
-  <hr class="sep">
-  <div>
-    <span class="section-label">Layout Style</span>
-    <div class="style-picker" id="style-picker">
-      <div class="style-opt active" data-style="dark" onclick="setStyle('dark')">
-        <div class="style-swatch dark-swatch"></div>
-        <div class="style-opt-label">Dark &amp; Refined<br><span>Navy, gold accents</span></div>
-      </div>
-      <div class="style-opt" data-style="light" onclick="setStyle('light')">
-        <div class="style-swatch light-swatch"></div>
-        <div class="style-opt-label">Natural &amp; Light<br><span>Cream, forest tones</span></div>
-      </div>
-      <div class="style-opt" data-style="bold" onclick="setStyle('bold')">
-        <div class="style-swatch bold-swatch"></div>
-        <div class="style-opt-label">Bold &amp; Modern<br><span>Charcoal, red accent</span></div>
-      </div>
-      <div class="style-opt" data-style="blank-slate" onclick="setStyle('blank-slate')">
-        <div class="style-swatch blank-slate-swatch"></div>
-        <div class="style-opt-label">Blank Slate<br><span>Custom background</span></div>
-      </div>
-      <div class="style-opt" data-style="retro" onclick="setStyle('retro')">
-        <div class="style-swatch retro-swatch"></div>
-        <div class="style-opt-label">Retro Sale<br><span>Sunburst, pop-art promo</span></div>
-      </div>
-    </div>
-  </div>
-
-  <div id="sb-wrap-overlay-mode">
-  <hr class="sep">
-  <div>
-    <span class="section-label">Overlay Mode</span>
-    <div class="overlay-mode-toggle">
-      <button class="om-btn" id="om-light" onclick="setOverlayMode('light')">☀ Light</button>
-      <button class="om-btn active" id="om-dark" onclick="setOverlayMode('dark')">◑ Dark</button>
-    </div>
-  </div>
-  </div>
-
-  <div id="sb-wrap-content-scale">
-  <hr class="sep">
-  <div>
-    <span class="section-label">Content Scale</span>
-    <div class="field-group">
-      <div class="range-row">
-        <input type="range" id="contentScale" min="50" max="200" value="100" step="1">
-        <span class="range-val" id="contentScaleVal">100%</span>
-      </div>
-      <div style="font-size:10px;color:#444;margin-top:-2px;">Scales all text, spacing &amp; elements</div>
-    </div>
-  </div>
-  </div>
-
-  <div id="sb-wrap-copy">
-  <hr class="sep">
-  <div>
-    <span class="section-label">Copy</span>
-    <div class="field-group">
-      <label>Eyebrow</label>
-      <input type="text" id="eyebrow" value="Serving Upstate New York">
-      <label>Headline (| = line break)</label>
-      <input type="text" id="headline" value="Built for Homes | That Have a Story.">
-      <label>Style</label>
-      <select id="headlineStyle">
-        <option value="mixed" selected>Mixed (italic + bold)</option>
-        <option value="italic">All italic</option>
-        <option value="normal">All upright</option>
-      </select>
-      <label>Headline size</label>
-      <div class="range-row">
-        <input type="range" id="headlineSize" min="12" max="60" value="32">
-        <span class="range-val" id="headlineSizeVal">32px</span>
-      </div>
-    </div>
-  </div>
-  </div>
-
-  <div id="sb-wrap-services">
-  <hr class="sep">
-  <div>
-    <span class="section-label">Services</span>
-    <div class="services-grid" id="services-grid">
-      <label class="service-toggle"><input type="checkbox" checked data-svc="Windows"> Windows</label>
-      <label class="service-toggle"><input type="checkbox" checked data-svc="Doors"> Doors</label>
-      <label class="service-toggle"><input type="checkbox" checked data-svc="Siding"> Siding</label>
-      <label class="service-toggle"><input type="checkbox" checked data-svc="Baths"> Baths</label>
-    </div>
-  </div>
-  </div>
-
-  <div id="sb-wrap-cta">
-  <hr class="sep">
-  <div>
-    <span class="section-label">Call to Action</span>
-    <div class="field-group">
-      <label>Button text</label>
-      <input type="text" id="ctaText" value="Schedule a Free Consultation">
-      <div class="toggle-row"><label>Show button</label><input type="checkbox" id="showCta" checked></div>
-      <div class="color-row" id="sb-accent-row">
-        <input type="color" id="accentColor" value="#ae8d4d">
-        <label>Accent color</label>
-      </div>
-    </div>
-  </div>
-  </div>
-
-  <hr class="sep">
-  <div>
-    <span class="section-label">Decorations</span>
-    <div class="field-group">
-      <div id="sb-corners-divider" style="display:flex;flex-direction:column;gap:8px;">
-      <div class="toggle-row"><label>Corner ornaments</label><input type="checkbox" id="showCorners" checked></div>
-      <div class="toggle-row"><label>Gold divider</label><input type="checkbox" id="showDivider" checked></div>
-      </div>
+  }
       <div class="toggle-row"><label>Show logo</label><input type="checkbox" id="showLogo" checked></div>
       <div class="toggle-row"><label>White logo</label><input type="checkbox" id="logoWhite"></div>
     </div>
