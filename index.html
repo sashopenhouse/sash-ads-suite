@@ -1473,13 +1473,14 @@ function buildPost(fmt, s, containerW) {
     bg.style.transform = 'none';
     tint.style.background = 'transparent';
 
-    const headerH   = Math.round(H * 0.30);
-    const discountH = Math.round(H * 0.16);
+    const headerH   = Math.round(H * 0.32);
+    const discountH = Math.round(H * 0.15);
     const servicesH = Math.round(H * 0.08);
     const ctaH      = Math.round(H * 0.22);
     const bottomH   = Math.max(0, H - (headerH + discountH + servicesH + ctaH));
 
-    let y = contentYOffset;
+    // Background layout stays fixed; contentY offsets only text/content bands.
+    let y = 0;
 
     // Header (sunburst)
     const header = document.createElement('div');
@@ -1507,10 +1508,31 @@ function buildPost(fmt, s, containerW) {
       `background-size:${dotGap}px ${dotGap}px;`;
     header.appendChild(halftone);
 
+    // Optional photo layer in header; controlled by photoY/photoScale/overlayDark sliders.
+    if (s.photoUrl) {
+      const photoDiv = document.createElement('div');
+      photoDiv.style.cssText =
+        `position:absolute;inset:0;` +
+        `background-image:url(${s.photoUrl});` +
+        `background-size:${(s.photoScale || 100) > 100 ? (s.photoScale || 100) + '%' : 'cover'};` +
+        `background-position:center ${s.photoY || 30}%;` +
+        `background-repeat:no-repeat;` +
+        `mix-blend-mode:multiply;opacity:0.5;z-index:1;`;
+      header.appendChild(photoDiv);
+      if ((s.overlayDark || 0) > 0) {
+        const photoShade = document.createElement('div');
+        photoShade.style.cssText =
+          `position:absolute;inset:0;z-index:2;` +
+          `background:rgba(0,0,0,${Math.min(0.75, (s.overlayDark || 0) / 100)});`;
+        header.appendChild(photoShade);
+      }
+    }
+
     if (s.showLogo !== false) {
       const logoH2  = Math.max(10, Math.round((s.logoSize || 28) * cs));
       const lWrap = document.createElement('div');
-      lWrap.style.cssText = `position:absolute;top:${Math.round(10*cs)}px;left:50%;transform:translateX(-50%);z-index:3;`;
+      const logoTop = Math.round(((s.logoY || 4) / 100) * H);
+      lWrap.style.cssText = `position:absolute;top:${logoTop}px;left:50%;transform:translateX(-50%);z-index:4;`;
       const lImg = document.createElement('img');
       lImg.src = LOGO_COLOR_SRC;
       lImg.style.cssText = `height:${logoH2}px;width:auto;display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.4));`;
@@ -1519,25 +1541,36 @@ function buildPost(fmt, s, containerW) {
     }
 
     const hlWrap = document.createElement('div');
+    const headlineTop = Math.round(50 * cs) + contentYOffset;
     hlWrap.style.cssText =
-      `position:absolute;left:0;right:0;top:${Math.round(50*cs)}px;` +
-      `text-align:center;z-index:4;`;
+      `position:absolute;left:0;right:0;top:${headlineTop}px;` +
+      `text-align:center;z-index:5;`;
     const hlParts = (s.headline || 'Made in America|Sale!').split('|').map(p => p.trim()).filter(Boolean);
     const hlFs = Math.max(16, Math.round((s.headlineSize || 36) * cs));
     hlParts.forEach((part, idx) => {
       const pEl = document.createElement('div');
       const isSecond = idx === 1;
+      const useItalic = s.headlineStyle === 'italic' || (s.headlineStyle !== 'normal' && idx === 0);
       pEl.style.cssText =
         `font-family:'Oswald',sans-serif;font-size:${isSecond ? Math.round(hlFs * 1.05) : hlFs}px;` +
-        `font-weight:700;letter-spacing:0.06em;text-transform:uppercase;` +
+        `font-weight:700;font-style:${useItalic ? 'italic' : 'normal'};letter-spacing:0.06em;text-transform:uppercase;` +
         `color:${isSecond ? retroYellow : retroWhite};` +
         `text-shadow:0 3px 0 rgba(0,0,0,0.2);line-height:0.95;`;
       pEl.textContent = part;
       hlWrap.appendChild(pEl);
     });
+    if (s.showEyebrow !== false && s.eyebrow) {
+      const eyebrowEl = document.createElement('div');
+      eyebrowEl.style.cssText =
+        `font-family:'Barlow',sans-serif;font-size:${Math.max(6, Math.round((s.eyebrowSize || 9) * cs))}px;` +
+        `font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:${retroWhite};` +
+        `margin-bottom:${Math.round(4 * cs)}px;text-shadow:0 1px 2px rgba(0,0,0,0.4);`;
+      eyebrowEl.textContent = s.eyebrow;
+      hlWrap.insertBefore(eyebrowEl, hlWrap.firstChild);
+    }
     header.appendChild(hlWrap);
     wrap.appendChild(header);
-    y += headerH;
+    y = headerH + contentYOffset;
 
     // Discount band
     const discount = document.createElement('div');
@@ -1571,7 +1604,7 @@ function buildPost(fmt, s, containerW) {
       : 'WINDOWS * BATHS * DOORS';
     const svcText = document.createElement('div');
     svcText.style.cssText =
-      `font-family:'Oswald',sans-serif;font-size:${Math.max(8, Math.round(10*cs))}px;` +
+      `font-family:'Oswald',sans-serif;font-size:${Math.max(8, Math.round((s.svcSize || 10) * cs))}px;` +
       `font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:${retroBlack};`;
     svcText.textContent = svcLine;
     services.appendChild(svcText);
@@ -1596,16 +1629,18 @@ function buildPost(fmt, s, containerW) {
       `font-weight:700;letter-spacing:0.04em;`;
     phone.textContent = '315.624.7344';
     ctaBox.appendChild(phone);
-    const ctaBtn = document.createElement('div');
-    ctaBtn.style.cssText =
-      `display:inline-block;margin-top:${Math.round(6*cs)}px;` +
-      `background:${retroYellow};color:${retroBlack};` +
-      `font-family:'Oswald',sans-serif;font-size:${Math.max(7,Math.round(9*cs))}px;` +
-      `font-weight:700;letter-spacing:0.1em;text-transform:uppercase;` +
-      `padding:${Math.round(5*cs)}px ${Math.round(12*cs)}px;border-radius:${Math.round(8*cs)}px;` +
-      `border:${Math.max(1,Math.round(2*cs))}px solid ${retroBlack};`;
-    ctaBtn.textContent = (s.ctaText || 'GET MY FREE QUOTE');
-    ctaBox.appendChild(ctaBtn);
+    if (s.showCta !== false) {
+      const ctaBtn = document.createElement('div');
+      ctaBtn.style.cssText =
+        `display:inline-block;margin-top:${Math.round(6*cs)}px;` +
+        `background:${retroYellow};color:${retroBlack};` +
+        `font-family:'Oswald',sans-serif;font-size:${Math.max(7,Math.round((s.ctaSize || 9)*cs))}px;` +
+        `font-weight:700;letter-spacing:0.1em;text-transform:uppercase;` +
+        `padding:${Math.round(5*cs)}px ${Math.round(12*cs)}px;border-radius:${Math.round(8*cs)}px;` +
+        `border:${Math.max(1,Math.round(2*cs))}px solid ${retroBlack};`;
+      ctaBtn.textContent = (s.ctaText || 'GET MY FREE QUOTE');
+      ctaBox.appendChild(ctaBtn);
+    }
     cta.appendChild(ctaBox);
     wrap.appendChild(cta);
     y += ctaH;
