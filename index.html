@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>New York Sash ΓÇö Ad Export Suite</title>
+<title>New York Sash &mdash; Ad Export Suite</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Barlow:wght@300;400;500;600;700&family=Dancing+Script:wght@600;700&family=Oswald:wght@300;400;600;700&family=Montserrat:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Raleway:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Bebas+Neue&family=Pacifico&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -244,6 +244,7 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
 .bold-swatch { background:linear-gradient(135deg,#1a1a2e 60%,#cc2222 100%); }
 .blank-slate-swatch { background:linear-gradient(135deg,#cc2222 55%,#ff5555 100%); }
 .retro-swatch { background:linear-gradient(135deg,#cc2222 38%,#1b3d6d 100%); }
+.modern-serif-swatch { background:linear-gradient(135deg,#f5f2ed 60%,#a54d2b 100%); }
 .style-opt-label { font-size:12px; color:var(--tx2); line-height:1.4; font-weight:500; }
 .style-opt-label span { font-size:10px; color:var(--tx3); font-weight:400; }
 .style-opt.active .style-opt-label { color:var(--tx); }
@@ -251,7 +252,7 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
 .sb-hidden { display:none !important; }
 .bs-panel { border-bottom:1px solid var(--ln); }
 .bs-acc-header { display:flex; justify-content:space-between; align-items:center; cursor:pointer; padding:9px 0 6px; font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--tx2); user-select:none; }
-.bs-acc-header::after { content:'Γû╛'; font-size:10px; color:var(--tx3); transition:transform 0.15s; flex-shrink:0; }
+.bs-acc-header::after { content:'\25be'; font-size:10px; color:var(--tx3); transition:transform 0.15s; flex-shrink:0; }
 .bs-acc-header.collapsed::after { transform:rotate(-90deg); }
 .bs-acc-body { padding-bottom:6px; }
 .bs-acc-body.collapsed { display:none; }
@@ -360,6 +361,10 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
         <div class="style-swatch retro-swatch"></div>
         <div class="style-opt-label">Retro Sale<br><span>Sunburst, pop-art promo</span></div>
       </div>
+      <div class="style-opt" data-style="modern-serif" onclick="setStyle('modern-serif')">
+        <div class="style-swatch modern-serif-swatch"></div>
+        <div class="style-opt-label">Modern Serif<br><span>Clean, editorial feel</span></div>
+      </div>
     </div>
   </div>
 
@@ -368,8 +373,8 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
   <div>
     <span class="section-label">Overlay Mode</span>
     <div class="overlay-mode-toggle">
-      <button class="om-btn" id="om-light" onclick="setOverlayMode('light')">ΓÿÇ Light</button>
-      <button class="om-btn active" id="om-dark" onclick="setOverlayMode('dark')">Γùæ Dark</button>
+      <button class="om-btn" id="om-light" onclick="setOverlayMode('light')">&#9728; Light</button>
+      <button class="om-btn active" id="om-dark" onclick="setOverlayMode('dark')">&#9681; Dark</button>
     </div>
   </div>
   </div>
@@ -412,6 +417,9 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
   </div>
   </div>
 
+  </div>
+
+
   <div id="sb-wrap-services">
   <hr class="sep">
   <div>
@@ -436,6 +444,39 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
       <div class="color-row" id="sb-accent-row">
         <input type="color" id="accentColor" value="#ae8d4d">
         <label>Accent color</label>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <div id="sb-wrap-dark-colors">
+  <hr class="sep">
+  <div>
+    <span class="section-label">Dark Palette</span>
+    <div class="field-group">
+      <div class="color-row">
+        <input type="color" id="darkEyebrowColor" value="#ae8d4d">
+        <label>Eyebrow</label>
+      </div>
+      <div class="color-row">
+        <input type="color" id="darkHeadlineColor" value="#f5eedf">
+        <label>Headline</label>
+      </div>
+      <div class="color-row">
+        <input type="color" id="darkHeadlineEmphasisColor" value="#ffffff">
+        <label>Headline emphasis</label>
+      </div>
+      <div class="color-row">
+        <input type="color" id="darkServicesColor" value="#c8b98a">
+        <label>Services</label>
+      </div>
+      <div class="color-row">
+        <input type="color" id="darkCtaBgColor" value="#ae8d4d">
+        <label>CTA background</label>
+      </div>
+      <div class="color-row">
+        <input type="color" id="darkCtaTextColor" value="#0b1928">
+        <label>CTA text</label>
       </div>
     </div>
   </div>
@@ -610,12 +651,25 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
   </div>
   </div>
 
+  <div id="sb-wrap-modern-serif" class="sb-hidden">
+  <hr class="sep">
+  <div>
+    <span class="section-label">Modern Serif Details</span>
+    <div class="field-group">
+      <label>Description text</label>
+      <input type="text" id="description" value="Make a real plan for your project.">
+      <label>Footer text</label>
+      <input type="text" id="footerText" value="MAY 14  &bull;  5PM  &bull;  NEW YORK SASH x FIRST SOURCE FCU">
+    </div>
+  </div>
+  </div>
+
   <hr class="sep">
   <div id="sb-templates">
     <span class="section-label">Templates</span>
     <div class="field-group">
       <div class="tpl-save-row">
-        <input type="text" id="tplNameInput" placeholder="Template nameΓÇª" onkeydown="if(event.key==='Enter')saveTemplate()">
+        <input type="text" id="tplNameInput" placeholder="Template name&hellip;" onkeydown="if(event.key==='Enter')saveTemplate()">
         <button class="btn-tpl-save" onclick="saveTemplate()">Save</button>
       </div>
       <div id="tpl-list"><div class="tpl-empty">No saved templates</div></div>
@@ -639,7 +693,7 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
 </div>
 
 <div id="main">
-  <p>Global settings apply to all formats ΓÇö click <strong>Customize</strong> on any card to override individual settings for that size</p>
+  <p>Global settings apply to all formats &mdash; click <strong>Customize</strong> on any card to override individual settings for that size</p>
   <div class="formats-grid" id="formats-grid"></div>
 </div>
 
@@ -653,7 +707,7 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
         <div id="modal-title">Customize Format</div>
         <div id="modal-subtitle"></div>
       </div>
-      <button id="modal-close" onclick="closeModal()">Γ£ò</button>
+      <button id="modal-close" onclick="closeModal()">&times;</button>
     </div>
     <div id="modal-body">
       <div id="modal-preview">
@@ -664,7 +718,7 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
         <!-- Header -->
         <div style="display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
           <span class="ov-label" style="color:#ae8d4d;">Per-format overrides</span>
-          <button id="modal-reset" onclick="modalResetOv()" style="display:none;">Γå║ Reset all</button>
+          <button id="modal-reset" onclick="modalResetOv()" style="display:none;">&#8634; Reset all</button>
         </div>
 
         <!-- SECTION: Photo -->
@@ -697,8 +751,8 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
         <div class="mc-section">
           <div class="mc-section-head">Overlay Mode</div>
           <div class="overlay-mode-toggle">
-            <button class="om-btn" id="m-om-light" onclick="mOvOverlay('light')">ΓÿÇ Light</button>
-            <button class="om-btn" id="m-om-dark" onclick="mOvOverlay('dark')">Γùæ Dark</button>
+            <button class="om-btn" id="m-om-light" onclick="mOvOverlay('light')">&#9728; Light</button>
+            <button class="om-btn" id="m-om-dark" onclick="mOvOverlay('dark')">&#9681; Dark</button>
           </div>
         </div>
         </div>
@@ -746,6 +800,30 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
           <label>CTA text</label>
           <input type="text" id="m-cta" oninput="mOv('ctaText',this.value)">
         </div>
+        </div>
+
+        <div id="m-wrap-modern-serif" class="sb-hidden">
+          <hr>
+          <div class="mc-section">
+            <div class="mc-section-head">Modern Serif</div>
+            <label>Description text</label>
+            <input type="text" id="m-description" oninput="mOv('description',this.value)">
+            <label>Footer text</label>
+            <input type="text" id="m-footerText" oninput="mOv('footerText',this.value)">
+          </div>
+        </div>
+
+        <div id="m-wrap-dark-colors">
+          <hr>
+          <div class="mc-section">
+            <div class="mc-section-head">Dark Palette</div>
+            <div class="color-row"><input type="color" id="m-darkEyebrowColor" value="#ae8d4d" oninput="mOv('darkEyebrowColor',this.value)"><label>Eyebrow</label></div>
+            <div class="color-row"><input type="color" id="m-darkHeadlineColor" value="#f5eedf" oninput="mOv('darkHeadlineColor',this.value)"><label>Headline</label></div>
+            <div class="color-row"><input type="color" id="m-darkHeadlineEmphasisColor" value="#ffffff" oninput="mOv('darkHeadlineEmphasisColor',this.value)"><label>Headline emphasis</label></div>
+            <div class="color-row"><input type="color" id="m-darkServicesColor" value="#c8b98a" oninput="mOv('darkServicesColor',this.value)"><label>Services</label></div>
+            <div class="color-row"><input type="color" id="m-darkCtaBgColor" value="#ae8d4d" oninput="mOv('darkCtaBgColor',this.value)"><label>CTA background</label></div>
+            <div class="color-row"><input type="color" id="m-darkCtaTextColor" value="#0b1928" oninput="mOv('darkCtaTextColor',this.value)"><label>CTA text</label></div>
+          </div>
         </div>
 
         <div id="m-wrap-font-sizes">
@@ -845,7 +923,7 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
                 <label>Vertical position</label>
                 <div class="range-row"><input type="range" id="m-bsTextY" min="-45" max="45" value="0" step="1" oninput="mOv('bsTextY',+this.value);mtxt('m-bsTextY-val',(+this.value>0?'+':'')+this.value+'%')"><span class="range-val" id="m-bsTextY-val">0%</span></div>
                 <label>Rotation</label>
-                <div class="range-row"><input type="range" id="m-bsTextRotate" min="-180" max="180" value="0" step="1" oninput="mOv('bsTextRotate',+this.value);mtxt('m-bsTextRotate-val',this.value+'┬░')"><span class="range-val" id="m-bsTextRotate-val">0┬░</span></div>
+                <div class="range-row"><input type="range" id="m-bsTextRotate" min="-180" max="180" value="0" step="1" oninput="mOv('bsTextRotate',+this.value);mtxt('m-bsTextRotate-val',this.value+'&deg;')"><span class="range-val" id="m-bsTextRotate-val">0&deg;</span></div>
               </div>
             </div>
           </div>
@@ -873,7 +951,7 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
                 <label>Vertical position</label>
                 <div class="range-row"><input type="range" id="m-bs2TextY" min="-45" max="45" value="20" step="1" oninput="mOv('bs2TextY',+this.value);mtxt('m-bs2TextY-val',(+this.value>0?'+':'')+this.value+'%')"><span class="range-val" id="m-bs2TextY-val">+20%</span></div>
                 <label>Rotation</label>
-                <div class="range-row"><input type="range" id="m-bs2TextRotate" min="-180" max="180" value="0" step="1" oninput="mOv('bs2TextRotate',+this.value);mtxt('m-bs2TextRotate-val',this.value+'┬░')"><span class="range-val" id="m-bs2TextRotate-val">0┬░</span></div>
+                <div class="range-row"><input type="range" id="m-bs2TextRotate" min="-180" max="180" value="0" step="1" oninput="mOv('bs2TextRotate',+this.value);mtxt('m-bs2TextRotate-val',this.value+'&deg;')"><span class="range-val" id="m-bs2TextRotate-val">0&deg;</span></div>
               </div>
             </div>
           </div>
@@ -894,7 +972,7 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
     </div>
     <div class="modal-footer">
       <button class="modal-btn-done" onclick="closeModal()">Done</button>
-      <button class="modal-btn-export" id="modal-export-btn">Γåô Export This Size</button>
+      <button class="modal-btn-export" id="modal-export-btn">&#10515; Export This Size</button>
     </div>
   </div>
 </div>
@@ -928,12 +1006,12 @@ function prepareInvertedLogo() {
   img.src = LOGO_COLOR_SRC;
 }
 const FORMATS = [
-  { id:'ig-square',    label:'Instagram / FB Post',       sub:'1080 ├ù 1080', w:1080, h:1080, aspect:1,        preview:220 },
-  { id:'fb-carousel',  label:'FB Carousel',                sub:'600 ├ù 600',   w:600,  h:600,  aspect:1,        preview:200 },
-  { id:'fb-dynamic',   label:'FB Dynamic Ad',              sub:'500 ├ù 500',   w:500,  h:500,  aspect:1,        preview:180 },
-  { id:'fb-lead',      label:'FB Lead / Link / Messenger', sub:'1200 ├ù 628',  w:1200, h:628,  aspect:1200/628, preview:240 },
-  { id:'fb-messenger', label:'FB Messenger Ad',            sub:'254 ├ù 133',   w:254,  h:133,  aspect:254/133,  preview:220 },
-  { id:'fb-stories',   label:'FB / IG Stories',            sub:'1080 ├ù 1920', w:1080, h:1920, aspect:9/16,     preview:240 },
+  { id:'ig-square',    label:'Instagram / FB Post',       sub:'1080 &times; 1080', w:1080, h:1080, aspect:1,        preview:220 },
+  { id:'fb-carousel',  label:'FB Carousel',                sub:'600 &times; 600',   w:600,  h:600,  aspect:1,        preview:200 },
+  { id:'fb-dynamic',   label:'FB Dynamic Ad',              sub:'500 &times; 500',   w:500,  h:500,  aspect:1,        preview:180 },
+  { id:'fb-lead',      label:'FB Lead / Link / Messenger', sub:'1200 &times; 628',  w:1200, h:628,  aspect:1200/628, preview:240 },
+  { id:'fb-messenger', label:'FB Messenger Ad',            sub:'254 &times; 133',   w:254,  h:133,  aspect:254/133,  preview:220 },
+  { id:'fb-stories',   label:'FB / IG Stories',            sub:'1080 &times; 1920', w:1080, h:1920, aspect:9/16,     preview:240 },
 ];
 
 const overrides = {};
@@ -965,6 +1043,12 @@ function getGlobal() {
     layoutStyle:   currentStyle,
     contentScale:  +document.getElementById('contentScale').value / 100,
     overlayMode:   currentOverlayMode,
+    darkEyebrowColor: document.getElementById('darkEyebrowColor').value,
+    darkHeadlineColor: document.getElementById('darkHeadlineColor').value,
+    darkHeadlineEmphasisColor: document.getElementById('darkHeadlineEmphasisColor').value,
+    darkServicesColor: document.getElementById('darkServicesColor').value,
+    darkCtaBgColor: document.getElementById('darkCtaBgColor').value,
+    darkCtaTextColor: document.getElementById('darkCtaTextColor').value,
     bsShowText:    document.getElementById('bsShowText').checked,
     bsText:        document.getElementById('bsText').value,
     bsFont:        document.getElementById('bsFont').value,
@@ -991,6 +1075,8 @@ function getGlobal() {
     bs2ImgY:       +document.getElementById('bs2ImgY').value,
     bs2ImgX:       +document.getElementById('bs2ImgX').value,
     patrioticDiscount: document.getElementById('patrioticDiscount').value,
+    description:   document.getElementById('description').value,
+    footerText:    document.getElementById('footerText').value,
   };
 }
 
@@ -1005,10 +1091,11 @@ function mergeState(fmtId) {
    'ctaText','showCta','showCorners','showDivider','showLogo','logoWhite',
    'contentY','logoSize','logoY','showEyebrow',
    'eyebrowSize','svcSize','ctaSize','layoutStyle','contentScale','overlayMode',
+    'darkEyebrowColor','darkHeadlineColor','darkHeadlineEmphasisColor','darkServicesColor','darkCtaBgColor','darkCtaTextColor',
    'bsShowText','bsText','bsFont','bsTextColor','bsTextSize','bsTextBold','bsTextItalic','bsTextAlign','bsTextY','bsBgColor','bsTextRotate',
    'bs2ShowText','bs2Text','bs2Font','bs2TextColor','bs2TextSize','bs2TextBold','bs2TextItalic','bs2TextAlign','bs2TextY','bs2TextRotate',
    'bs2ImgShow','bs2ImgScale','bs2ImgY','bs2ImgX',
-   'patrioticDiscount'
+   'patrioticDiscount','description','footerText'
   ].forEach(k => {
     m[k] = ov[k] !== undefined ? ov[k] : g[k];
   });
@@ -1024,6 +1111,12 @@ function mergeState(fmtId) {
   if (m.showLogo === undefined) m.showLogo = true;
   if (m.logoWhite === undefined) m.logoWhite = false;
   if (m.overlayMode === undefined) m.overlayMode = 'dark';
+  if (!m.darkEyebrowColor) m.darkEyebrowColor = '#ae8d4d';
+  if (!m.darkHeadlineColor) m.darkHeadlineColor = '#f5eedf';
+  if (!m.darkHeadlineEmphasisColor) m.darkHeadlineEmphasisColor = '#ffffff';
+  if (!m.darkServicesColor) m.darkServicesColor = '#c8b98a';
+  if (!m.darkCtaBgColor) m.darkCtaBgColor = '#ae8d4d';
+  if (!m.darkCtaTextColor) m.darkCtaTextColor = '#0b1928';
   if (m.bsShowText === undefined) m.bsShowText = true;
   if (!m.bsText) m.bsText = 'Your text here';
   if (!m.bsFont) m.bsFont = 'Barlow';
@@ -1050,6 +1143,8 @@ function mergeState(fmtId) {
   if (m.bs2ImgY === undefined) m.bs2ImgY = 0;
   if (m.bs2ImgX === undefined) m.bs2ImgX = 0;
   if (!m.patrioticDiscount) m.patrioticDiscount = '25% OFF EVERYTHING';
+  if (m.description === undefined) m.description = 'Make a real plan for your project.';
+  if (m.footerText === undefined) m.footerText = 'MAY 14  ΓÇó  5PM  ΓÇó  NEW YORK SASH x FIRST SOURCE FCU';
   return m;
 }
 
@@ -1081,6 +1176,11 @@ function buildTint(dark, style, overlayMode) {
       return `linear-gradient(to bottom,rgba(15,15,25,0.08) 0%,rgba(15,15,25,0.0) 35%,rgba(15,15,25,${(base*0.3).toFixed(2)}) 60%,rgba(15,15,25,${(base*0.8).toFixed(2)}) 100%)`;
     }
     return `linear-gradient(to bottom,rgba(15,15,25,${Math.min(base+0.15,0.95).toFixed(2)}) 0%,rgba(15,15,25,${Math.max(0,base-0.3).toFixed(2)}) 30%,rgba(15,15,25,${Math.max(0,base-0.2).toFixed(2)}) 60%,rgba(15,15,25,${Math.min(base+0.3,0.98).toFixed(2)}) 100%)`;
+  }
+
+  if (style === 'modern-serif') {
+    // Light desaturated warm wash
+    return `linear-gradient(to bottom, rgba(245, 242, 237, ${Math.min(base + 0.1, 0.78).toFixed(2)}) 0%, rgba(245, 242, 237, ${Math.min(base, 0.58).toFixed(2)}) 40%, rgba(245, 242, 237, ${Math.min(base + 0.05, 0.68).toFixed(2)}) 70%, rgba(238, 232, 222, ${Math.min(base + 0.22, 0.88).toFixed(2)}) 100%)`;
   }
 
   return `linear-gradient(to bottom,rgba(10,22,40,0) 0%,rgba(10,22,40,0) 100%)`;
@@ -1120,11 +1220,12 @@ function buildPost(fmt, s, containerW) {
     // Light overlay = pale ivory wash ΓåÆ dark navy text
     // Dark overlay  = deep navy tint ΓåÆ cream text
     const useLight = !isLight;
-    const headlineColor = useLight ? '#f5eedf' : '#0e1828';
-    const eyebrowColor  = useLight ? acc : acc;
-    const svcColor      = useLight ? '#c8b98a' : 'rgba(14,24,40,0.75)';
-    const ctaTextColor  = useLight ? '#0b1928' : '#f5eedf';
-    const ctaBg         = useLight ? acc : '#0e1e36';
+    const headlineColor = s.darkHeadlineColor || '#f5eedf';
+    const eyebrowColor  = s.darkEyebrowColor || acc;
+    const svcColor      = s.darkServicesColor || '#c8b98a';
+    const ctaTextColor  = s.darkCtaTextColor || '#0b1928';
+    const ctaBg         = s.darkCtaBgColor || acc;
+    const headlineEmphasisColor = s.darkHeadlineEmphasisColor || '#ffffff';
 
     if (s.showCorners) {
       const cSz = Math.round(56*cs), pad = Math.round(16*cs);
@@ -1180,7 +1281,7 @@ function buildPost(fmt, s, containerW) {
     const parts = s.headline.split('|').map(p=>p.trim());
     if (s.headlineStyle==='italic') hlEl.innerHTML = parts.map(p=>`<span style="display:block;font-style:italic;font-weight:400;">${p}</span>`).join('');
     else if (s.headlineStyle==='normal') hlEl.innerHTML = parts.map(p=>`<span style="display:block;font-style:normal;font-weight:400;">${p}</span>`).join('');
-    else hlEl.innerHTML = parts.map((p,i)=>i===0?`<span style="display:block;font-style:italic;font-weight:400;">${p}</span>`:`<span style="display:block;font-style:normal;font-weight:600;color:${useLight?'#fff':'#0a0800'};">${p}</span>`).join('');
+    else hlEl.innerHTML = parts.map((p,i)=>i===0?`<span style="display:block;font-style:italic;font-weight:400;">${p}</span>`:`<span style="display:block;font-style:normal;font-weight:600;color:${headlineEmphasisColor};">${p}</span>`).join('');
     content.appendChild(hlEl);
 
     const svcFs=Math.max(6,Math.round((s.svcSize||10)*cs)), dotSz=Math.max(2,Math.round(3*cs)), dotMx=Math.round(8*cs);
@@ -1654,6 +1755,72 @@ function buildPost(fmt, s, containerW) {
       wrap.appendChild(bottom);
     }
 
+  } else if (style === 'modern-serif') {
+    // ΓöÇΓöÇ STYLE 6: Modern Serif ΓöÇΓöÇ
+    const rust = acc;
+    const contentYPct = s.contentY || 0;
+    const padS = Math.round(40 * cs);
+    const contentTop = Math.round(H * 0.3) + Math.round(contentYPct / 100 * H);
+    
+    const content = document.createElement('div');
+    content.style.cssText = `position:absolute;top:${contentTop}px;left:0;right:0;padding:0 ${padS}px;text-align:center;pointer-events:none;z-index:10;`;
+
+    // Eyebrow with Dot
+    if (s.showEyebrow !== false) {
+      const eWrap = document.createElement('div');
+      eWrap.style.cssText = `display:flex;align-items:center;justify-content:center;gap:${Math.round(8*cs)}px;margin-bottom:${Math.round(16*cs)}px;`;
+      
+      const dot = document.createElement('div');
+      dot.style.cssText = `width:${Math.round(8*cs)}px;height:${Math.round(8*cs)}px;background:${rust};border-radius:50%;flex-shrink:0;`;
+      
+      const eEl = document.createElement('span');
+      eEl.style.cssText = `font-family:'Barlow',sans-serif;font-weight:600;font-size:${Math.max(7,Math.round((s.eyebrowSize||9)*cs))}px;letter-spacing:0.25em;text-transform:uppercase;color:#111;`;
+      eEl.textContent = s.eyebrow;
+      
+      eWrap.appendChild(dot);
+      eWrap.appendChild(eEl);
+      content.appendChild(eWrap);
+    }
+
+    // Headline (Mixed Serif)
+    const hlFs = Math.max(20, Math.round(s.headlineSize * 2.2 * cs)); // Scaled up for serif impact
+    const hlEl = document.createElement('div');
+    hlEl.style.cssText = `font-family:'Playfair Display',serif;font-size:${hlFs}px;line-height:1.05;color:#111;margin-bottom:${Math.round(20*cs)}px;`;
+    
+    const parts = s.headline.split('|').map(p=>p.trim());
+    if (parts.length > 1) {
+      hlEl.innerHTML = `<span style="display:block;font-weight:400;">${parts[0]}</span>` + 
+                       `<span style="display:block;font-style:italic;font-weight:400;color:${rust};">${parts[1]}</span>`;
+    } else {
+      hlEl.textContent = s.headline;
+    }
+    content.appendChild(hlEl);
+
+    // Description
+    if (s.description) {
+      const dEl = document.createElement('div');
+      dEl.style.cssText = `font-family:'Barlow',sans-serif;font-size:${Math.max(10,Math.round(14*cs))}px;color:#444;margin-bottom:${Math.round(24*cs)}px;font-weight:400;`;
+      dEl.textContent = s.description;
+      content.appendChild(dEl);
+    }
+
+    // CTA Button
+    if (s.showCta) {
+      const ctaEl = document.createElement('div');
+      ctaEl.style.cssText = `display:inline-block;background:#1a1a1a;color:#fff;font-family:'Barlow',sans-serif;font-size:${Math.max(8,Math.round((s.ctaSize||10)*cs))}px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;padding:${Math.round(12*cs)}px ${Math.round(32*cs)}px;cursor:pointer;`;
+      ctaEl.textContent = s.ctaText + '  ΓåÆ';
+      content.appendChild(ctaEl);
+    }
+    
+    wrap.appendChild(content);
+
+    // Footer
+    if (s.footerText) {
+      const footer = document.createElement('div');
+      footer.style.cssText = `position:absolute;bottom:${Math.round(24*cs)}px;left:0;right:0;text-align:center;font-family:'Barlow',sans-serif;font-size:${Math.max(7,Math.round(9*cs))}px;letter-spacing:0.2em;text-transform:uppercase;color:#8a7a6a;font-weight:500;`;
+      footer.textContent = s.footerText;
+      wrap.appendChild(footer);
+    }
   }
 
   return wrap;
@@ -1689,7 +1856,8 @@ const accentDefaults = {
   light: '#c8a96e',
   bold: '#cc2222',
   'blank-slate': accentInput ? accentInput.value : '#c9963d',
-  'retro': '#1a6f8c'
+  'retro': '#1a6f8c',
+  'modern-serif': '#a54d2b'
 };
 const accentByStyle = { ...accentDefaults };
 
@@ -1719,8 +1887,9 @@ if (accentInput) {
 function updateSidebarForStyle(s) {
   const isBS   = s === 'blank-slate';
   const isRetro = s === 'retro';
+  const isModernSerif = s === 'modern-serif';
   const isDark = s === 'dark';
-  const showAccent = s === 'dark' || s === 'bold';
+  const showAccent = s === 'dark' || s === 'bold' || s === 'modern-serif';
   ['sb-overlay-dark','sb-wrap-overlay-mode','sb-wrap-content-scale',
    'sb-wrap-copy','sb-wrap-services','sb-wrap-cta'
   ].forEach(id => {
@@ -1729,21 +1898,31 @@ function updateSidebarForStyle(s) {
   });
   // Retro: hide overlay mode only (content scale still applies)
   const omEl = document.getElementById('sb-wrap-overlay-mode');
-  if (omEl && isRetro) omEl.classList.add('sb-hidden');
+  if (omEl) omEl.classList.toggle('sb-hidden', isRetro || isModernSerif);
+  
+  // Services hidden for Modern Serif
+  const svcEl = document.getElementById('sb-wrap-services');
+  if (svcEl) svcEl.classList.toggle('sb-hidden', isModernSerif);
+
   const accentRow = document.getElementById('sb-accent-row');
   if (accentRow) accentRow.classList.toggle('sb-hidden', !showAccent);
   // Corners + divider only exist in Dark & Refined
   const cornersEl = document.getElementById('sb-corners-divider');
   if (cornersEl) cornersEl.classList.toggle('sb-hidden', !isDark);
+  const darkPaletteEl = document.getElementById('sb-wrap-dark-colors');
+  if (darkPaletteEl) darkPaletteEl.classList.toggle('sb-hidden', !isDark);
   const bsTxtSec = document.getElementById('sb-wrap-blank-slate-text');
   if (bsTxtSec) bsTxtSec.classList.toggle('sb-hidden', !isBS);
   const retroSec = document.getElementById('sb-wrap-retro');
   if (retroSec) retroSec.classList.toggle('sb-hidden', !isRetro);
+  const modernSerifSec = document.getElementById('sb-wrap-modern-serif');
+  if (modernSerifSec) modernSerifSec.classList.toggle('sb-hidden', !isModernSerif);
 }
 
 function updateModalForStyle(s) {
   const isBS   = s === 'blank-slate';
   const isRetro = s === 'retro';
+  const isModernSerif = s === 'modern-serif';
   const isDark = s === 'dark';
   ['m-wrap-overlay-dark','m-wrap-overlay-mode','m-wrap-content-scale',
    'm-wrap-copy','m-wrap-font-sizes','m-wrap-services'
@@ -1753,12 +1932,19 @@ function updateModalForStyle(s) {
   });
   // Retro: hide overlay mode only (content scale still applies)
   const mOmEl = document.getElementById('m-wrap-overlay-mode');
-  if (mOmEl && isRetro) mOmEl.classList.add('sb-hidden');
+  if (mOmEl) mOmEl.classList.toggle('sb-hidden', isRetro || isModernSerif);
+
+  // Services hidden for Modern Serif
+  const mSvcEl = document.getElementById('m-wrap-services');
+  if (mSvcEl) mSvcEl.classList.toggle('sb-hidden', isModernSerif);
+
   // Corners + divider only exist in Dark & Refined
   ['m-tog-corners','m-tog-divider'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.toggle('sb-hidden', !isDark);
   });
+  const darkPaletteMEl = document.getElementById('m-wrap-dark-colors');
+  if (darkPaletteMEl) darkPaletteMEl.classList.toggle('sb-hidden', !isDark);
   ['m-tog-cta'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.toggle('sb-hidden', isBS);
@@ -1767,6 +1953,8 @@ function updateModalForStyle(s) {
   if (bsMEl) bsMEl.classList.toggle('sb-hidden', !isBS);
   const retroMEl = document.getElementById('m-wrap-retro');
   if (retroMEl) retroMEl.classList.toggle('sb-hidden', !isRetro);
+  const modernSerifMEl = document.getElementById('m-wrap-modern-serif');
+  if (modernSerifMEl) modernSerifMEl.classList.toggle('sb-hidden', !isModernSerif);
 }
 
 function setOverlayMode(mode) {
@@ -1807,6 +1995,12 @@ function openModal(fmtId) {
   sv('m-headline',s.headline);
   sv('m-hlstyle',s.headlineStyle);
   sv('m-cta',s.ctaText);
+  sv('m-darkEyebrowColor', s.darkEyebrowColor || '#ae8d4d');
+  sv('m-darkHeadlineColor', s.darkHeadlineColor || '#f5eedf');
+  sv('m-darkHeadlineEmphasisColor', s.darkHeadlineEmphasisColor || '#ffffff');
+  sv('m-darkServicesColor', s.darkServicesColor || '#c8b98a');
+  sv('m-darkCtaBgColor', s.darkCtaBgColor || '#ae8d4d');
+  sv('m-darkCtaTextColor', s.darkCtaTextColor || '#0b1928');
   sv('m-hlsize',s.headlineSize);     mtxt('m-hlsize-val',s.headlineSize+'px');
   sv('m-eyebrowSize',s.eyebrowSize||9); mtxt('m-eyebrowSize-val',(s.eyebrowSize||9)+'px');
   sv('m-svcSize',s.svcSize||10);     mtxt('m-svcSize-val',(s.svcSize||10)+'px');
@@ -1849,6 +2043,9 @@ function openModal(fmtId) {
   sv('m-bs2TextRotate', s.bs2TextRotate||0);mtxt('m-bs2TextRotate-val', (s.bs2TextRotate||0)+'┬░');
   // ΓöÇΓöÇ Patriotic per-format overrides ΓöÇΓöÇ
   sv('m-patrioticDiscount', s.patrioticDiscount || '25% OFF EVERYTHING');
+  // ΓöÇΓöÇ Modern Serif per-format overrides ΓöÇΓöÇ
+  sv('m-description', s.description || '');
+  sv('m-footerText', s.footerText || '');
   document.getElementById('modal-reset').style.display=Object.keys(ov).length>0?'inline':'none';
   updateModalForStyle(s.layoutStyle || currentStyle);
   renderModalPreview();
@@ -2175,6 +2372,12 @@ function applyTemplate(i) {
   set('showLogo',      s.showLogo      ?? true);
   set('logoWhite',     s.logoWhite     ?? false);
   set('accentColor',   s.accent        ?? '#ae8d4d');
+  set('darkEyebrowColor', s.darkEyebrowColor ?? '#ae8d4d');
+  set('darkHeadlineColor', s.darkHeadlineColor ?? '#f5eedf');
+  set('darkHeadlineEmphasisColor', s.darkHeadlineEmphasisColor ?? '#ffffff');
+  set('darkServicesColor', s.darkServicesColor ?? '#c8b98a');
+  set('darkCtaBgColor', s.darkCtaBgColor ?? '#ae8d4d');
+  set('darkCtaTextColor', s.darkCtaTextColor ?? '#0b1928');
   set('contentScale',  (s.contentScale ?? 1) * 100);
   set('bsBgColor',     s.bsBgColor     ?? '#cc2222');
   set('bsShowText',    s.bsShowText    ?? true);
@@ -2202,6 +2405,8 @@ function applyTemplate(i) {
   set('bs2ImgY',       s.bs2ImgY       ?? 0);
   set('bs2ImgX',       s.bs2ImgX       ?? 0);
   set('patrioticDiscount', s.patrioticDiscount ?? '25% OFF EVERYTHING');
+  set('description',   s.description   ?? 'Make a real plan for your project.');
+  set('footerText',    s.footerText    ?? 'MAY 14  ΓÇó  5PM  ΓÇó  NEW YORK SASH x FIRST SOURCE FCU');
 
   // Services checkboxes
   document.querySelectorAll('#services-grid input').forEach(cb => {
