@@ -423,6 +423,11 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
         <input type="range" id="headlineSize" min="12" max="60" value="32">
         <span class="range-val" id="headlineSizeVal">32px</span>
       </div>
+      <label>Headline line height</label>
+      <div class="range-row">
+        <input type="range" id="headlineLineHeight" min="0.8" max="2" step="0.1" value="1.1">
+        <span class="range-val" id="headlineLineHeightVal">1.1</span>
+      </div>
     </div>
   </div>
   </div>
@@ -899,6 +904,8 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
           <div class="mc-section-head">Font Sizes</div>
           <label>Headline</label>
           <div class="range-row"><input type="range" id="m-hlsize" min="10" max="60" value="32" oninput="mOv('headlineSize',+this.value);mtxt('m-hlsize-val',this.value+'px')"><span class="range-val" id="m-hlsize-val">32px</span></div>
+          <label>Line height</label>
+          <div class="range-row"><input type="range" id="m-hllh" min="0.8" max="2" step="0.1" value="1.1" oninput="mOv('headlineLineHeight',+this.value);mtxt('m-hllh-val',this.value)"><span class="range-val" id="m-hllh-val">1.1</span></div>
           <label>Eyebrow</label>
           <div class="range-row"><input type="range" id="m-eyebrowSize" min="6" max="20" value="9" oninput="mOv('eyebrowSize',+this.value);mtxt('m-eyebrowSize-val',this.value+'px')"><span class="range-val" id="m-eyebrowSize-val">9px</span></div>
           <label>Services</label>
@@ -1096,6 +1103,7 @@ function getGlobal() {
     headline:      document.getElementById('headline').value,
     headlineStyle: document.getElementById('headlineStyle').value,
     headlineSize:  +document.getElementById('headlineSize').value,
+    headlineLineHeight: +document.getElementById('headlineLineHeight').value,
     services:      [...document.querySelectorAll('#services-grid input:checked')].map(c=>c.dataset.svc),
     ctaText:       document.getElementById('ctaText').value,
     showCta:       document.getElementById('showCta').checked,
@@ -1158,7 +1166,7 @@ function mergeState(fmtId) {
   ['photoUrl','blankSlateBgUrl','bs2ImageUrl','accent'].forEach(k => m[k] = g[k]);
   // services: use override if it has items, else global
   m.services = (ov.services && ov.services.length > 0) ? ov.services : g.services;
-  ['photoX','photoY','photoScale','overlayDark','headlineSize','eyebrow','headline','headlineStyle',
+  ['photoX','photoY','photoScale','overlayDark','headlineSize','headlineLineHeight','eyebrow','headline','headlineStyle',
    'ctaText','showCta','showCorners','showDivider','showLogo','logoWhite',
    'contentY','logoSize','logoY','showEyebrow',
    'eyebrowSize','svcSize','ctaSize','layoutStyle','contentScale','overlayMode',
@@ -1357,8 +1365,9 @@ function buildPost(fmt, s, containerW) {
     }
 
     const hlFs = Math.max(10,Math.round(s.headlineSize*cs));
+    const hlLh = s.headlineLineHeight || 1.15;
     const hlEl = document.createElement('div');
-    hlEl.style.cssText = `font-family:'Playfair Display',serif;font-size:${hlFs}px;font-weight:400;color:${headlineColor};line-height:1.15;margin-bottom:${Math.round(10*cs)}px;${useLight ? `text-shadow:0 2px ${Math.round(12*cs)}px rgba(0,0,0,0.5);` : ''}`;
+    hlEl.style.cssText = `font-family:'Playfair Display',serif;font-size:${hlFs}px;font-weight:400;color:${headlineColor};line-height:${hlLh};margin-bottom:${Math.round(10*cs)}px;${useLight ? `text-shadow:0 2px ${Math.round(12*cs)}px rgba(0,0,0,0.5);` : ''}`;
     const parts = s.headline.split('|').map(p=>p.trim());
     if (s.headlineStyle==='italic') hlEl.innerHTML = parts.map(p=>`<span style="display:block;font-style:italic;font-weight:400;">${p}</span>`).join('');
     else if (s.headlineStyle==='normal') hlEl.innerHTML = parts.map(p=>`<span style="display:block;font-style:normal;font-weight:400;">${p}</span>`).join('');
@@ -1425,8 +1434,9 @@ function buildPost(fmt, s, containerW) {
     }
 
     const hlFs = Math.max(10, Math.round(s.headlineSize*cs));
+    const hlLh = s.headlineLineHeight || 1.1;
     const hlEl = document.createElement('div');
-    hlEl.style.cssText = `font-family:'Playfair Display',serif;font-size:${hlFs}px;font-weight:600;color:${headlineColor};line-height:1.1;margin-bottom:${Math.round(12*cs)}px;${useLight ? `text-shadow:0 2px ${Math.round(10*cs)}px rgba(0,0,0,0.45);` : ''}`;
+    hlEl.style.cssText = `font-family:'Playfair Display',serif;font-size:${hlFs}px;font-weight:600;color:${headlineColor};line-height:${hlLh};margin-bottom:${Math.round(12*cs)}px;${useLight ? `text-shadow:0 2px ${Math.round(10*cs)}px rgba(0,0,0,0.45);` : ''}`;
     const parts = s.headline.split('|').map(p=>p.trim());
     hlEl.innerHTML = parts.map(p=>`<span style="display:block;">${p}</span>`).join('');
     content.appendChild(hlEl);
@@ -1490,8 +1500,9 @@ function buildPost(fmt, s, containerW) {
     }
 
     const hlFs = Math.max(10, Math.round(s.headlineSize*cs));
+    const hlLh = s.headlineLineHeight || 1.05;
     const hlEl = document.createElement('div');
-    hlEl.style.cssText = `font-family:'Barlow',sans-serif;font-size:${hlFs}px;font-weight:700;color:${headlineColor};line-height:1.05;margin-bottom:${Math.round(14*cs)}px;letter-spacing:-0.01em;`;
+    hlEl.style.cssText = `font-family:'Barlow',sans-serif;font-size:${hlFs}px;font-weight:700;color:${headlineColor};line-height:${hlLh};margin-bottom:${Math.round(14*cs)}px;letter-spacing:-0.01em;`;
     const parts = s.headline.split('|').map(p=>p.trim());
     hlEl.innerHTML = parts.map(p=>`<span style="display:block;">${p}</span>`).join('');
     content.appendChild(hlEl);
@@ -1611,7 +1622,7 @@ function buildPost(fmt, s, containerW) {
           `font-weight:${bold ? '700' : '400'};`+
           `font-style:${italic ? 'italic' : 'normal'};`+
           `color:${color || '#ffffff'};`+
-          `line-height:1.15;`+
+          `line-height:${s.headlineLineHeight || 1.15};`+
           `text-shadow:0 2px 16px rgba(0,0,0,0.45);`;
         lineEl.textContent = line;
         txtWrap.appendChild(lineEl);
@@ -1865,8 +1876,9 @@ function buildPost(fmt, s, containerW) {
 
     // Headline (Mixed Serif)
     const hlFs = Math.max(20, Math.round(s.headlineSize * 2.2 * cs)); // Scaled up for serif impact
+    const hlLh = s.headlineLineHeight || 1.05;
     const hlEl = document.createElement('div');
-    hlEl.style.cssText = `font-family:'Playfair Display',serif;font-size:${hlFs}px;line-height:1.05;color:#111;margin-bottom:${Math.round(20*cs)}px;`;
+    hlEl.style.cssText = `font-family:'Playfair Display',serif;font-size:${hlFs}px;line-height:${hlLh};color:#111;margin-bottom:${Math.round(20*cs)}px;`;
     
     const parts = s.headline.split('|').map(p=>p.trim());
     if (parts.length > 1) {
@@ -2000,9 +2012,10 @@ function buildPost(fmt, s, containerW) {
 
     const parts = (s.headline || '').split('|').map(p => p.trim()).filter(Boolean);
     const headlineFs = Math.max(12, Math.round(s.headlineSize * (isWideHero ? 1.26 : 1.42) * cs));
+    const hlLh = s.headlineLineHeight || 0.94;
     const headline = document.createElement('div');
     headline.style.cssText =
-      `font-family:'Barlow',sans-serif;line-height:0.94;letter-spacing:-0.015em;` +
+      `font-family:'Barlow',sans-serif;line-height:${hlLh};letter-spacing:-0.015em;` +
       `font-size:${headlineFs}px;font-weight:800;margin-bottom:${Math.round((isWideHero ? 10 : 14)*cs)}px;`;
     if (parts.length > 1) {
       headline.innerHTML =
@@ -2235,6 +2248,7 @@ function openModal(fmtId) {
   sv('m-darkCtaBgColor', s.darkCtaBgColor || '#ae8d4d');
   sv('m-darkCtaTextColor', s.darkCtaTextColor || '#0b1928');
   sv('m-hlsize',s.headlineSize);     mtxt('m-hlsize-val',s.headlineSize+'px');
+  sv('m-hllh',s.headlineLineHeight||1.1); mtxt('m-hllh-val',(s.headlineLineHeight||1.1).toFixed(1));
   sv('m-eyebrowSize',s.eyebrowSize||9); mtxt('m-eyebrowSize-val',(s.eyebrowSize||9)+'px');
   sv('m-svcSize',s.svcSize||10);     mtxt('m-svcSize-val',(s.svcSize||10)+'px');
   sv('m-ctaSize',s.ctaSize||9);      mtxt('m-ctaSize-val',(s.ctaSize||9)+'px');
@@ -2385,6 +2399,7 @@ document.getElementById('blankSlateBgInput').addEventListener('change',function(
 });
 document.getElementById('overlayDark').addEventListener('input',function(){document.getElementById('overlayDarkVal').textContent=this.value+'%';});
 document.getElementById('headlineSize').addEventListener('input',function(){document.getElementById('headlineSizeVal').textContent=this.value+'px';});
+document.getElementById('headlineLineHeight').addEventListener('input',function(){document.getElementById('headlineLineHeightVal').textContent=this.value;});
 document.getElementById('contentScale').addEventListener('input',function(){document.getElementById('contentScaleVal').textContent=this.value+'%';});
 document.getElementById('bsTextSize').addEventListener('input',function(){document.getElementById('bsTextSizeVal').textContent=this.value+'px';});
 document.getElementById('bsTextY').addEventListener('input',function(){const v=+this.value;document.getElementById('bsTextYVal').textContent=(v>0?'+':'')+v+'%';});
@@ -2602,12 +2617,14 @@ function applyTemplate(i) {
   };
 
   set('photoY',        s.photoY        ?? 30);
+  set('photoX',        s.photoX        ?? 50);
   set('photoScale',    s.photoScale    ?? 100);
   set('overlayDark',   s.overlayDark   ?? 55);
   set('eyebrow',       s.eyebrow       ?? '');
   set('headline',      s.headline      ?? '');
   set('headlineStyle', s.headlineStyle ?? 'bold');
   set('headlineSize',  s.headlineSize  ?? 32);
+  set('headlineLineHeight', s.headlineLineHeight ?? 1.1);
   set('ctaText',       s.ctaText       ?? '');
   set('showCta',       s.showCta       ?? false);
   set('showCorners',   s.showCorners   ?? false);
