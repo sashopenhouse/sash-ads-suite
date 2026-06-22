@@ -1973,16 +1973,35 @@ function buildPost(fmt, s, containerW) {
       wrap.appendChild(logoWrap);
     }
 
+    if (s.showEyebrow !== false && s.eyebrow) {
+      const eyebrowTop = Math.round((isWideHero ? 20 : 22) * cs);
+      const eyebrowRight = Math.round((isWideHero ? 22 : 24) * cs);
+      const eyebrowWrap = document.createElement('div');
+      eyebrowWrap.style.cssText = `position:absolute;top:${eyebrowTop}px;right:${eyebrowRight}px;z-index:6;display:flex;align-items:center;gap:${Math.round(9*cs)}px;`;
+      const eyebrowBar = document.createElement('span');
+      eyebrowBar.style.cssText = `width:${Math.round(24*cs)}px;height:${Math.max(2,Math.round(2*cs))}px;background:${accent};display:inline-block;`;
+      const eyebrowText = document.createElement('span');
+      eyebrowText.style.cssText =
+        `font-family:'Barlow',sans-serif;font-size:${Math.max(6,Math.round((s.eyebrowSize||8)*cs))}px;font-weight:700;` +
+        `letter-spacing:0.16em;text-transform:uppercase;color:rgba(230,238,248,0.74);`;
+      eyebrowText.textContent = s.eyebrow;
+      eyebrowWrap.appendChild(eyebrowBar);
+      eyebrowWrap.appendChild(eyebrowText);
+      wrap.appendChild(eyebrowWrap);
+    }
+
     if (s.showCta && (s.ctaText || '').trim()) {
-      const ctaTop = Math.round((isWideHero ? 20 : 22) * cs);
-      const ctaRight = Math.round((isWideHero ? 22 : 24) * cs);
+      const blockLeft = Math.round((isWideHero ? 24 : 24) * cs);
+      const blockRight = Math.round(W * (isWideHero ? 0.34 : 0.24));
+      const blockTop = Math.round(H * (isWideHero ? 0.2 : 0.16)) + contentShift;
       const ctaBtn = document.createElement('div');
       ctaBtn.style.cssText =
-        `position:absolute;top:${ctaTop}px;right:${ctaRight}px;z-index:6;` +
+        `position:absolute;top:${blockTop}px;left:${blockLeft}px;right:${blockRight}px;z-index:6;` +
         `font-family:'Barlow',sans-serif;font-size:${Math.max(6,Math.round((s.ctaSize||8)*cs))}px;font-weight:700;` +
         `letter-spacing:0.1em;text-transform:uppercase;color:rgba(230,238,248,0.8);` +
         `border:1px solid rgba(230,238,248,0.32);padding:${Math.round((isWideHero ? 6 : 7)*cs)}px ${Math.round((isWideHero ? 14 : 12)*cs)}px;` +
-        `background:rgba(5,9,16,0.12);`;
+        `background:rgba(5,9,16,0.12);` +
+        `display:flex;align-items:center;gap:${Math.round(9*cs)}px;margin-bottom:${Math.round((isWideHero ? 8 : 10)*cs)}px;`;
       ctaBtn.textContent = `${s.ctaText.toUpperCase()} >>`;
       wrap.appendChild(ctaBtn);
     }
@@ -1994,21 +2013,6 @@ function buildPost(fmt, s, containerW) {
     content.style.cssText =
       `position:absolute;top:${blockTop}px;left:${blockLeft}px;right:${blockRight}px;z-index:6;` +
       `text-align:left;pointer-events:none;`;
-
-    if (s.showEyebrow !== false && s.eyebrow) {
-      const eyebrowWrap = document.createElement('div');
-      eyebrowWrap.style.cssText = `display:flex;align-items:center;gap:${Math.round(9*cs)}px;margin-bottom:${Math.round((isWideHero ? 8 : 10)*cs)}px;`;
-      const eyebrowBar = document.createElement('span');
-      eyebrowBar.style.cssText = `width:${Math.round(24*cs)}px;height:${Math.max(2,Math.round(2*cs))}px;background:${accent};display:inline-block;`;
-      const eyebrowText = document.createElement('span');
-      eyebrowText.style.cssText =
-        `font-family:'Barlow',sans-serif;font-size:${Math.max(6,Math.round((s.eyebrowSize||8)*cs))}px;font-weight:700;` +
-        `letter-spacing:0.16em;text-transform:uppercase;color:rgba(230,238,248,0.74);`;
-      eyebrowText.textContent = s.eyebrow;
-      eyebrowWrap.appendChild(eyebrowBar);
-      eyebrowWrap.appendChild(eyebrowText);
-      content.appendChild(eyebrowWrap);
-    }
 
     const parts = (s.headline || '').split('|').map(p => p.trim()).filter(Boolean);
     const headlineFs = Math.max(12, Math.round(s.headlineSize * (isWideHero ? 1.26 : 1.42) * cs));
