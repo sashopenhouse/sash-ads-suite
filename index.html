@@ -2047,14 +2047,6 @@ function buildPost(fmt, s, containerW) {
     }
     content.appendChild(headline);
 
-    const detail = document.createElement('div');
-    detail.style.cssText =
-      `font-family:'Barlow',sans-serif;font-size:${Math.max(7,Math.round((s.svcSize||10)*(isWideHero ? 0.9 : 1.1)*cs))}px;` +
-      `line-height:1.45;color:rgba(220,229,240,0.74);max-width:${Math.round(W*(isWideHero ? 0.5 : 0.56))}px;`;
-    const svcLine = (s.services && s.services.length) ? s.services.join(', ').toLowerCase() : 'windows, doors, siding and bathrooms';
-    detail.innerHTML =
-      `${Math.max(1, s.services && s.services.length ? s.services.length * 2 : 8)} trade questions - ${svcLine}.`;
-    content.appendChild(detail);
     wrap.appendChild(content);
   }
 
