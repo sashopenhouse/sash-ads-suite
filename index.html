@@ -245,6 +245,7 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
 .blank-slate-swatch { background:linear-gradient(135deg,#cc2222 55%,#ff5555 100%); }
 .retro-swatch { background:linear-gradient(135deg,#cc2222 38%,#1b3d6d 100%); }
 .modern-serif-swatch { background:linear-gradient(135deg,#f5f2ed 60%,#a54d2b 100%); }
+.quiz-hero-swatch { background:linear-gradient(135deg,#0b1423 10%,#1b2e44 62%,#f31b53 100%); }
 .style-opt-label { font-size:12px; color:var(--tx2); line-height:1.4; font-weight:500; }
 .style-opt-label span { font-size:10px; color:var(--tx3); font-weight:400; }
 .style-opt.active .style-opt-label { color:var(--tx); }
@@ -341,6 +342,10 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
   <div>
     <span class="section-label">Layout Style</span>
     <div class="style-picker" id="style-picker">
+      <div class="style-opt" data-style="quiz-hero" onclick="setStyle('quiz-hero')">
+        <div class="style-swatch quiz-hero-swatch"></div>
+        <div class="style-opt-label">Applicant Quiz Hero<br><span>Cinematic, high-contrast</span></div>
+      </div>
       <div class="style-opt active" data-style="dark" onclick="setStyle('dark')">
         <div class="style-swatch dark-swatch"></div>
         <div class="style-opt-label">Dark &amp; Refined<br><span>Navy, gold accents</span></div>
@@ -664,6 +669,38 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
   </div>
   </div>
 
+  <div id="sb-wrap-quiz-hero" class="sb-hidden">
+  <hr class="sep">
+  <div>
+    <span class="section-label">Quiz Hero Overlay Word</span>
+    <div class="field-group">
+      <label>Text</label>
+      <input type="text" id="quizOverlayText" value="START">
+      <label>Font</label>
+      <select id="quizOverlayFont">
+        <option value="Oswald" selected>Oswald (condensed, bold)</option>
+        <option value="Bebas Neue">Bebas Neue (display, all caps)</option>
+        <option value="Barlow">Barlow (clean sans)</option>
+      </select>
+      <label>Scale</label>
+      <div class="range-row">
+        <input type="range" id="quizOverlayScale" min="50" max="220" value="100" step="1">
+        <span class="range-val" id="quizOverlayScaleVal">100%</span>
+      </div>
+      <label>Horizontal position</label>
+      <div class="range-row">
+        <input type="range" id="quizOverlayX" min="-40" max="40" value="0" step="1">
+        <span class="range-val" id="quizOverlayXVal">0%</span>
+      </div>
+      <label>Vertical position</label>
+      <div class="range-row">
+        <input type="range" id="quizOverlayY" min="-40" max="40" value="0" step="1">
+        <span class="range-val" id="quizOverlayYVal">0%</span>
+      </div>
+    </div>
+  </div>
+  </div>
+
   <hr class="sep">
   <div id="sb-templates">
     <span class="section-label">Templates</span>
@@ -810,6 +847,27 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
             <input type="text" id="m-description" oninput="mOv('description',this.value)">
             <label>Footer text</label>
             <input type="text" id="m-footerText" oninput="mOv('footerText',this.value)">
+          </div>
+        </div>
+
+        <div id="m-wrap-quiz-hero" class="sb-hidden">
+          <hr>
+          <div class="mc-section">
+            <div class="mc-section-head">Quiz Hero Overlay Word</div>
+            <label>Text</label>
+            <input type="text" id="m-quizOverlayText" oninput="mOv('quizOverlayText',this.value)">
+            <label>Font</label>
+            <select id="m-quizOverlayFont" onchange="mOv('quizOverlayFont',this.value)">
+              <option value="Oswald">Oswald</option>
+              <option value="Bebas Neue">Bebas Neue</option>
+              <option value="Barlow">Barlow</option>
+            </select>
+            <label>Scale</label>
+            <div class="range-row"><input type="range" id="m-quizOverlayScale" min="50" max="220" value="100" step="1" oninput="mOv('quizOverlayScale',+this.value);mtxt('m-quizOverlayScale-val',this.value+'%')"><span class="range-val" id="m-quizOverlayScale-val">100%</span></div>
+            <label>Horizontal position</label>
+            <div class="range-row"><input type="range" id="m-quizOverlayX" min="-40" max="40" value="0" step="1" oninput="mOv('quizOverlayX',+this.value);mtxt('m-quizOverlayX-val',(this.value>0?'+':'')+this.value+'%')"><span class="range-val" id="m-quizOverlayX-val">0%</span></div>
+            <label>Vertical position</label>
+            <div class="range-row"><input type="range" id="m-quizOverlayY" min="-40" max="40" value="0" step="1" oninput="mOv('quizOverlayY',+this.value);mtxt('m-quizOverlayY-val',(this.value>0?'+':'')+this.value+'%')"><span class="range-val" id="m-quizOverlayY-val">0%</span></div>
           </div>
         </div>
 
@@ -1077,6 +1135,11 @@ function getGlobal() {
     patrioticDiscount: document.getElementById('patrioticDiscount').value,
     description:   document.getElementById('description').value,
     footerText:    document.getElementById('footerText').value,
+    quizOverlayText: document.getElementById('quizOverlayText').value,
+    quizOverlayScale: +document.getElementById('quizOverlayScale').value,
+    quizOverlayX: +document.getElementById('quizOverlayX').value,
+    quizOverlayY: +document.getElementById('quizOverlayY').value,
+    quizOverlayFont: document.getElementById('quizOverlayFont').value,
   };
 }
 
@@ -1095,7 +1158,8 @@ function mergeState(fmtId) {
    'bsShowText','bsText','bsFont','bsTextColor','bsTextSize','bsTextBold','bsTextItalic','bsTextAlign','bsTextY','bsBgColor','bsTextRotate',
    'bs2ShowText','bs2Text','bs2Font','bs2TextColor','bs2TextSize','bs2TextBold','bs2TextItalic','bs2TextAlign','bs2TextY','bs2TextRotate',
    'bs2ImgShow','bs2ImgScale','bs2ImgY','bs2ImgX',
-   'patrioticDiscount','description','footerText'
+   'patrioticDiscount','description','footerText',
+   'quizOverlayText','quizOverlayScale','quizOverlayX','quizOverlayY','quizOverlayFont'
   ].forEach(k => {
     m[k] = ov[k] !== undefined ? ov[k] : g[k];
   });
@@ -1145,6 +1209,11 @@ function mergeState(fmtId) {
   if (!m.patrioticDiscount) m.patrioticDiscount = '25% OFF EVERYTHING';
   if (m.description === undefined) m.description = 'Make a real plan for your project.';
   if (m.footerText === undefined) m.footerText = 'MAY 14  ΓÇó  5PM  ΓÇó  NEW YORK SASH x FIRST SOURCE FCU';
+  if (m.quizOverlayText === undefined) m.quizOverlayText = 'START';
+  if (m.quizOverlayScale === undefined) m.quizOverlayScale = 100;
+  if (m.quizOverlayX === undefined) m.quizOverlayX = 0;
+  if (m.quizOverlayY === undefined) m.quizOverlayY = 0;
+  if (!m.quizOverlayFont) m.quizOverlayFont = 'Oswald';
   return m;
 }
 
@@ -1181,6 +1250,10 @@ function buildTint(dark, style, overlayMode) {
   if (style === 'modern-serif') {
     // Light desaturated warm wash
     return `linear-gradient(to bottom, rgba(245, 242, 237, ${Math.min(base + 0.1, 0.78).toFixed(2)}) 0%, rgba(245, 242, 237, ${Math.min(base, 0.58).toFixed(2)}) 40%, rgba(245, 242, 237, ${Math.min(base + 0.05, 0.68).toFixed(2)}) 70%, rgba(238, 232, 222, ${Math.min(base + 0.22, 0.88).toFixed(2)}) 100%)`;
+  }
+
+  if (style === 'quiz-hero') {
+    return `linear-gradient(to bottom,rgba(8,14,24,${Math.min(base+0.12,0.82).toFixed(2)}) 0%,rgba(8,14,24,${Math.min(base+0.18,0.9).toFixed(2)}) 58%,rgba(3,6,10,${Math.min(base+0.32,0.97).toFixed(2)}) 100%)`;
   }
 
   return `linear-gradient(to bottom,rgba(10,22,40,0) 0%,rgba(10,22,40,0) 100%)`;
@@ -1821,6 +1894,126 @@ function buildPost(fmt, s, containerW) {
       footer.textContent = s.footerText;
       wrap.appendChild(footer);
     }
+  } else if (style === 'quiz-hero') {
+    const accent = acc || '#f31b53';
+    const contentYPct = s.contentY || 0;
+    const contentShift = Math.round(contentYPct / 100 * H);
+    const isWideHero = fmt.aspect > 1.45;
+
+    const leftShade = document.createElement('div');
+    leftShade.style.cssText =
+      `position:absolute;inset:0;z-index:2;` +
+      `background:linear-gradient(90deg,rgba(3,7,12,0.96) 0%,rgba(3,7,12,0.88) 36%,rgba(3,7,12,0.5) 62%,rgba(3,7,12,0.18) 100%);`;
+    wrap.appendChild(leftShade);
+
+    const redWash = document.createElement('div');
+    redWash.style.cssText =
+      `position:absolute;inset:0;z-index:3;` +
+      `background:linear-gradient(96deg,rgba(164,12,42,0.5) 0%,rgba(164,12,42,0.24) 34%,rgba(164,12,42,0.06) 70%,rgba(164,12,42,0) 100%);`;
+    wrap.appendChild(redWash);
+
+    const baseFade = document.createElement('div');
+    baseFade.style.cssText =
+      `position:absolute;left:0;right:0;bottom:0;height:${Math.round(H*0.34)}px;z-index:4;` +
+      `background:linear-gradient(to top,rgba(3,6,10,0.92) 0%,rgba(3,6,10,0.5) 52%,rgba(3,6,10,0) 100%);`;
+    wrap.appendChild(baseFade);
+
+    const overlayFontMap = {
+      'Oswald': "'Oswald', sans-serif",
+      'Bebas Neue': "'Bebas Neue', cursive",
+      'Barlow': "'Barlow', sans-serif"
+    };
+    const overlayFont = overlayFontMap[s.quizOverlayFont] || "'Oswald', sans-serif";
+    const overlayScale = (s.quizOverlayScale === undefined ? 100 : s.quizOverlayScale) / 100;
+    const overlayX = Math.round(((s.quizOverlayX || 0) / 100) * W);
+    const overlayY = Math.round(((s.quizOverlayY || 0) / 100) * H);
+    const overlayWeight = s.quizOverlayFont === 'Bebas Neue' ? 400 : 700;
+    const overlayTrack = s.quizOverlayFont === 'Bebas Neue' ? '0.05em' : '0.03em';
+    const overlayText = (s.quizOverlayText === undefined ? 'START' : s.quizOverlayText);
+    if ((overlayText || '').trim()) {
+      const giantWord = document.createElement('div');
+      giantWord.style.cssText =
+        `position:absolute;left:${Math.round((isWideHero ? 10 : 16)*cs) + overlayX}px;bottom:${Math.round((isWideHero ? 0 : 6)*cs) + overlayY}px;z-index:5;` +
+        `font-family:${overlayFont};font-weight:${overlayWeight};font-size:${Math.max(24,Math.round((isWideHero ? 176 : 162)*cs*overlayScale))}px;` +
+        `letter-spacing:${overlayTrack};text-transform:uppercase;color:rgba(255,255,255,0.055);line-height:1;pointer-events:none;`;
+      giantWord.textContent = overlayText;
+      wrap.appendChild(giantWord);
+    }
+
+    if (s.showLogo !== false) {
+      const logoH = Math.max(10, Math.round((s.logoSize || (isWideHero ? 26 : 30)) * cs));
+      const logoTop = Math.round(((s.logoY || (isWideHero ? 3.4 : 4)) / 100) * H);
+      const logoLeft = Math.round((isWideHero ? 22 : 24) * cs);
+      const logoWrap = document.createElement('div');
+      logoWrap.style.cssText = `position:absolute;top:${logoTop}px;left:${logoLeft}px;z-index:6;pointer-events:none;`;
+      const logoImg = document.createElement('img');
+      logoImg.src = s.logoWhite ? (LOGO_INVERTED_SRC || LOGO_COLOR_SRC) : LOGO_COLOR_SRC;
+      logoImg.style.cssText = `height:${logoH}px;width:auto;display:block;opacity:0.97;filter:brightness(1.06);`;
+      logoWrap.appendChild(logoImg);
+      wrap.appendChild(logoWrap);
+    }
+
+    if (s.showCta && (s.ctaText || '').trim()) {
+      const ctaTop = Math.round((isWideHero ? 20 : 22) * cs);
+      const ctaRight = Math.round((isWideHero ? 22 : 24) * cs);
+      const ctaBtn = document.createElement('div');
+      ctaBtn.style.cssText =
+        `position:absolute;top:${ctaTop}px;right:${ctaRight}px;z-index:6;` +
+        `font-family:'Barlow',sans-serif;font-size:${Math.max(6,Math.round((s.ctaSize||8)*cs))}px;font-weight:700;` +
+        `letter-spacing:0.1em;text-transform:uppercase;color:rgba(230,238,248,0.8);` +
+        `border:1px solid rgba(230,238,248,0.32);padding:${Math.round((isWideHero ? 6 : 7)*cs)}px ${Math.round((isWideHero ? 14 : 12)*cs)}px;` +
+        `background:rgba(5,9,16,0.12);`;
+      ctaBtn.textContent = `${s.ctaText.toUpperCase()} >>`;
+      wrap.appendChild(ctaBtn);
+    }
+
+    const blockLeft = Math.round((isWideHero ? 24 : 24) * cs);
+    const blockRight = Math.round(W * (isWideHero ? 0.34 : 0.24));
+    const blockTop = Math.round(H * (isWideHero ? 0.2 : 0.16)) + contentShift;
+    const content = document.createElement('div');
+    content.style.cssText =
+      `position:absolute;top:${blockTop}px;left:${blockLeft}px;right:${blockRight}px;z-index:6;` +
+      `text-align:left;pointer-events:none;`;
+
+    if (s.showEyebrow !== false && s.eyebrow) {
+      const eyebrowWrap = document.createElement('div');
+      eyebrowWrap.style.cssText = `display:flex;align-items:center;gap:${Math.round(9*cs)}px;margin-bottom:${Math.round((isWideHero ? 8 : 10)*cs)}px;`;
+      const eyebrowBar = document.createElement('span');
+      eyebrowBar.style.cssText = `width:${Math.round(24*cs)}px;height:${Math.max(2,Math.round(2*cs))}px;background:${accent};display:inline-block;`;
+      const eyebrowText = document.createElement('span');
+      eyebrowText.style.cssText =
+        `font-family:'Barlow',sans-serif;font-size:${Math.max(6,Math.round((s.eyebrowSize||8)*cs))}px;font-weight:700;` +
+        `letter-spacing:0.16em;text-transform:uppercase;color:rgba(230,238,248,0.74);`;
+      eyebrowText.textContent = s.eyebrow;
+      eyebrowWrap.appendChild(eyebrowBar);
+      eyebrowWrap.appendChild(eyebrowText);
+      content.appendChild(eyebrowWrap);
+    }
+
+    const parts = (s.headline || '').split('|').map(p => p.trim()).filter(Boolean);
+    const headlineFs = Math.max(12, Math.round(s.headlineSize * (isWideHero ? 1.26 : 1.42) * cs));
+    const headline = document.createElement('div');
+    headline.style.cssText =
+      `font-family:'Barlow',sans-serif;line-height:0.94;letter-spacing:-0.015em;` +
+      `font-size:${headlineFs}px;font-weight:800;margin-bottom:${Math.round((isWideHero ? 10 : 14)*cs)}px;`;
+    if (parts.length > 1) {
+      headline.innerHTML =
+        `<span style="display:block;color:#f8fbff;font-weight:800;">${parts[0]}</span>` +
+        `<span style="display:block;color:${accent};font-weight:800;">${parts.slice(1).join(' ')}</span>`;
+    } else {
+      headline.innerHTML = `<span style="display:block;color:#f8fbff;font-weight:800;">${s.headline || ''}</span>`;
+    }
+    content.appendChild(headline);
+
+    const detail = document.createElement('div');
+    detail.style.cssText =
+      `font-family:'Barlow',sans-serif;font-size:${Math.max(7,Math.round((s.svcSize||10)*(isWideHero ? 0.9 : 1.1)*cs))}px;` +
+      `line-height:1.45;color:rgba(220,229,240,0.74);max-width:${Math.round(W*(isWideHero ? 0.5 : 0.56))}px;`;
+    const svcLine = (s.services && s.services.length) ? s.services.join(', ').toLowerCase() : 'windows, doors, siding and bathrooms';
+    detail.innerHTML =
+      `${Math.max(1, s.services && s.services.length ? s.services.length * 2 : 8)} trade questions - ${svcLine}.`;
+    content.appendChild(detail);
+    wrap.appendChild(content);
   }
 
   return wrap;
@@ -1857,7 +2050,8 @@ const accentDefaults = {
   bold: '#cc2222',
   'blank-slate': accentInput ? accentInput.value : '#c9963d',
   'retro': '#1a6f8c',
-  'modern-serif': '#a54d2b'
+  'modern-serif': '#a54d2b',
+  'quiz-hero': '#f31b53'
 };
 const accentByStyle = { ...accentDefaults };
 
@@ -1873,6 +2067,30 @@ function setStyle(s) {
     el.classList.toggle('active', el.dataset.style === s);
   });
   if (accentInput) accentInput.value = accentByStyle[s] || accentDefaults[s] || accentInput.value;
+
+  if (s === 'quiz-hero') {
+    if (document.getElementById('eyebrow')?.value === 'Serving Upstate New York') {
+      document.getElementById('eyebrow').value = 'Trade Skills Quiz';
+    }
+    if (document.getElementById('headline')?.value === 'Built for Homes | That Have a Story.') {
+      document.getElementById('headline').value = 'Could you cut it on | Our Installer Crew?';
+    }
+    if (document.getElementById('ctaText')?.value === 'Schedule a Free Consultation') {
+      document.getElementById('ctaText').value = '';
+    }
+    if (document.getElementById('headlineStyle')) {
+      document.getElementById('headlineStyle').value = 'normal';
+    }
+    if (document.getElementById('logoWhite')) {
+      document.getElementById('logoWhite').checked = true;
+    }
+    if (document.getElementById('headlineSize')) {
+      document.getElementById('headlineSize').value = '40';
+      const sizeVal = document.getElementById('headlineSizeVal');
+      if (sizeVal) sizeVal.textContent = '40px';
+    }
+  }
+
   updateSidebarForStyle(s);
   refreshAllPreviews();
 }
@@ -1888,8 +2106,9 @@ function updateSidebarForStyle(s) {
   const isBS   = s === 'blank-slate';
   const isRetro = s === 'retro';
   const isModernSerif = s === 'modern-serif';
+  const isQuizHero = s === 'quiz-hero';
   const isDark = s === 'dark';
-  const showAccent = s === 'dark' || s === 'bold' || s === 'modern-serif';
+  const showAccent = s === 'dark' || s === 'bold' || s === 'modern-serif' || s === 'quiz-hero';
   ['sb-overlay-dark','sb-wrap-overlay-mode','sb-wrap-content-scale',
    'sb-wrap-copy','sb-wrap-services','sb-wrap-cta'
   ].forEach(id => {
@@ -1898,7 +2117,7 @@ function updateSidebarForStyle(s) {
   });
   // Retro: hide overlay mode only (content scale still applies)
   const omEl = document.getElementById('sb-wrap-overlay-mode');
-  if (omEl) omEl.classList.toggle('sb-hidden', isRetro || isModernSerif);
+  if (omEl) omEl.classList.toggle('sb-hidden', isRetro || isModernSerif || isQuizHero);
   
   // Services hidden for Modern Serif
   const svcEl = document.getElementById('sb-wrap-services');
@@ -1917,12 +2136,15 @@ function updateSidebarForStyle(s) {
   if (retroSec) retroSec.classList.toggle('sb-hidden', !isRetro);
   const modernSerifSec = document.getElementById('sb-wrap-modern-serif');
   if (modernSerifSec) modernSerifSec.classList.toggle('sb-hidden', !isModernSerif);
+  const quizHeroSec = document.getElementById('sb-wrap-quiz-hero');
+  if (quizHeroSec) quizHeroSec.classList.toggle('sb-hidden', !isQuizHero);
 }
 
 function updateModalForStyle(s) {
   const isBS   = s === 'blank-slate';
   const isRetro = s === 'retro';
   const isModernSerif = s === 'modern-serif';
+  const isQuizHero = s === 'quiz-hero';
   const isDark = s === 'dark';
   ['m-wrap-overlay-dark','m-wrap-overlay-mode','m-wrap-content-scale',
    'm-wrap-copy','m-wrap-font-sizes','m-wrap-services'
@@ -1932,7 +2154,7 @@ function updateModalForStyle(s) {
   });
   // Retro: hide overlay mode only (content scale still applies)
   const mOmEl = document.getElementById('m-wrap-overlay-mode');
-  if (mOmEl) mOmEl.classList.toggle('sb-hidden', isRetro || isModernSerif);
+  if (mOmEl) mOmEl.classList.toggle('sb-hidden', isRetro || isModernSerif || isQuizHero);
 
   // Services hidden for Modern Serif
   const mSvcEl = document.getElementById('m-wrap-services');
@@ -1955,6 +2177,8 @@ function updateModalForStyle(s) {
   if (retroMEl) retroMEl.classList.toggle('sb-hidden', !isRetro);
   const modernSerifMEl = document.getElementById('m-wrap-modern-serif');
   if (modernSerifMEl) modernSerifMEl.classList.toggle('sb-hidden', !isModernSerif);
+  const quizHeroMEl = document.getElementById('m-wrap-quiz-hero');
+  if (quizHeroMEl) quizHeroMEl.classList.toggle('sb-hidden', !isQuizHero);
 }
 
 function setOverlayMode(mode) {
@@ -2046,6 +2270,12 @@ function openModal(fmtId) {
   // ΓöÇΓöÇ Modern Serif per-format overrides ΓöÇΓöÇ
   sv('m-description', s.description || '');
   sv('m-footerText', s.footerText || '');
+  // ΓöÇΓöÇ Quiz Hero per-format overrides ΓöÇΓöÇ
+  sv('m-quizOverlayText', s.quizOverlayText === undefined ? 'START' : s.quizOverlayText);
+  sv('m-quizOverlayFont', s.quizOverlayFont || 'Oswald');
+  sv('m-quizOverlayScale', s.quizOverlayScale || 100); mtxt('m-quizOverlayScale-val', (s.quizOverlayScale || 100) + '%');
+  sv('m-quizOverlayX', s.quizOverlayX || 0); mtxt('m-quizOverlayX-val', ((s.quizOverlayX || 0) > 0 ? '+' : '') + (s.quizOverlayX || 0) + '%');
+  sv('m-quizOverlayY', s.quizOverlayY || 0); mtxt('m-quizOverlayY-val', ((s.quizOverlayY || 0) > 0 ? '+' : '') + (s.quizOverlayY || 0) + '%');
   document.getElementById('modal-reset').style.display=Object.keys(ov).length>0?'inline':'none';
   updateModalForStyle(s.layoutStyle || currentStyle);
   renderModalPreview();
@@ -2155,6 +2385,9 @@ document.getElementById('bs2TextRotate').addEventListener('input',function(){doc
 document.getElementById('bs2ImgScale').addEventListener('input',function(){document.getElementById('bs2ImgScaleVal').textContent=this.value+'%';});
 document.getElementById('bs2ImgY').addEventListener('input',function(){const v=+this.value;document.getElementById('bs2ImgYVal').textContent=(v>0?'+':'')+v+'%';});
 document.getElementById('bs2ImgX').addEventListener('input',function(){const v=+this.value;document.getElementById('bs2ImgXVal').textContent=(v>0?'+':'')+v+'%';});
+document.getElementById('quizOverlayScale').addEventListener('input',function(){document.getElementById('quizOverlayScaleVal').textContent=this.value+'%';});
+document.getElementById('quizOverlayX').addEventListener('input',function(){const v=+this.value;document.getElementById('quizOverlayXVal').textContent=(v>0?'+':'')+v+'%';});
+document.getElementById('quizOverlayY').addEventListener('input',function(){const v=+this.value;document.getElementById('quizOverlayYVal').textContent=(v>0?'+':'')+v+'%';});
 document.getElementById('bs2ImgInput').addEventListener('change',function(e){
   const file=e.target.files[0];if(!file)return;
   const reader=new FileReader();reader.onload=ev=>{
@@ -2407,6 +2640,11 @@ function applyTemplate(i) {
   set('patrioticDiscount', s.patrioticDiscount ?? '25% OFF EVERYTHING');
   set('description',   s.description   ?? 'Make a real plan for your project.');
   set('footerText',    s.footerText    ?? 'MAY 14  ΓÇó  5PM  ΓÇó  NEW YORK SASH x FIRST SOURCE FCU');
+  set('quizOverlayText', s.quizOverlayText ?? 'START');
+  set('quizOverlayScale', s.quizOverlayScale ?? 100);
+  set('quizOverlayX', s.quizOverlayX ?? 0);
+  set('quizOverlayY', s.quizOverlayY ?? 0);
+  set('quizOverlayFont', s.quizOverlayFont ?? 'Oswald');
 
   // Services checkboxes
   document.querySelectorAll('#services-grid input').forEach(cb => {
@@ -2434,6 +2672,9 @@ function applyTemplate(i) {
     ['bs2ImgScale',  'bs2ImgScaleVal',  v => v + '%'],
     ['bs2ImgY',      'bs2ImgYVal',      v => sgn(v)],
     ['bs2ImgX',      'bs2ImgXVal',      v => sgn(v)],
+    ['quizOverlayScale','quizOverlayScaleVal',v => v + '%'],
+    ['quizOverlayX', 'quizOverlayXVal', v => sgn(v)],
+    ['quizOverlayY', 'quizOverlayYVal', v => sgn(v)],
   ].forEach(([inId, spId, fmt]) => {
     const inp = document.getElementById(inId);
     const spn = document.getElementById(spId);
