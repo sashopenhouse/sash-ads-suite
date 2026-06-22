@@ -2006,19 +2006,20 @@ function buildPost(fmt, s, containerW) {
       wrap.appendChild(eyebrowWrap);
     }
 
-    if (s.showCta && (s.ctaText || '').trim()) {
+    const quizCtaText = (s.ctaText || '').replace(/\s*>+\s*$/, '').trim().toUpperCase();
+    if (s.showCta && quizCtaText) {
       const blockLeft = Math.round((isWideHero ? 24 : 24) * cs);
-      const blockRight = Math.round(W * (isWideHero ? 0.34 : 0.24));
       const blockTop = Math.round(H * (isWideHero ? 0.2 : 0.16)) + contentShift + Math.round((s.quizCtaY || 0) / 100 * H);
       const ctaBtn = document.createElement('div');
       ctaBtn.style.cssText =
-        `position:absolute;top:${blockTop}px;left:${blockLeft}px;right:${blockRight}px;z-index:6;` +
+        `position:absolute;top:${blockTop}px;left:${blockLeft}px;z-index:6;max-width:${Math.round(W * (isWideHero ? 0.44 : 0.62))}px;` +
         `font-family:'Barlow',sans-serif;font-size:${Math.max(6,Math.round((s.ctaSize||8)*cs))}px;font-weight:700;` +
-        `letter-spacing:0.1em;text-transform:uppercase;color:rgba(230,238,248,0.8);` +
-        `border:1px solid rgba(230,238,248,0.32);padding:${Math.round((isWideHero ? 6 : 7)*cs)}px ${Math.round((isWideHero ? 14 : 12)*cs)}px;` +
-        `background:rgba(5,9,16,0.12);` +
-        `display:flex;align-items:center;gap:${Math.round(9*cs)}px;margin-bottom:${Math.round((isWideHero ? 8 : 10)*cs)}px;`;
-      ctaBtn.textContent = `${s.ctaText.toUpperCase()} >>`;
+        `letter-spacing:0.08em;text-transform:uppercase;color:#f4f8ff;` +
+        `border:1px solid rgba(255,255,255,0.26);padding:${Math.round((isWideHero ? 10 : 11)*cs)}px ${Math.round((isWideHero ? 12 : 10)*cs)}px ${Math.round((isWideHero ? 10 : 11)*cs)}px ${Math.round((isWideHero ? 16 : 14)*cs)}px;` +
+        `background:linear-gradient(135deg,rgba(243,27,83,0.62) 0%,rgba(188,18,70,0.76) 100%);` +
+        `border-radius:${Math.round(999*cs)}px;box-shadow:0 ${Math.round(6*cs)}px ${Math.round(18*cs)}px rgba(0,0,0,0.34),inset 0 1px 0 rgba(255,255,255,0.2);` +
+        `display:inline-flex;align-items:center;backdrop-filter:blur(${Math.max(1,Math.round(4*cs))}px);margin-bottom:${Math.round((isWideHero ? 8 : 10)*cs)}px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;`;
+      ctaBtn.textContent = quizCtaText;
       wrap.appendChild(ctaBtn);
     }
 
@@ -2116,9 +2117,24 @@ function setStyle(s) {
     if (document.getElementById('headline')?.value === 'Built for Homes | That Have a Story.') {
       document.getElementById('headline').value = 'Could you cut it on | Our Installer Crew?';
     }
-    if (document.getElementById('ctaText')?.value === 'Schedule a Free Consultation') {
-      document.getElementById('ctaText').value = '';
+    const ctaInput = document.getElementById('ctaText');
+    if (ctaInput) {
+      ctaInput.value = 'Take The Quiz';
     }
+    if (document.getElementById('showCta')) {
+      document.getElementById('showCta').checked = true;
+    }
+    // Clear stale per-format CTA overrides so quiz defaults appear immediately.
+    FORMATS.forEach(f => {
+      const ov = overrides[f.id] || {};
+      if (ov.showCta === false) delete ov.showCta;
+      if (typeof ov.ctaText === 'string') {
+        const ovText = ov.ctaText.trim();
+        if (!ovText || /^start\s+quiz\s*>*$/i.test(ovText) || ovText === 'Schedule a Free Consultation') {
+          delete ov.ctaText;
+        }
+      }
+    });
     if (document.getElementById('headlineStyle')) {
       document.getElementById('headlineStyle').value = 'normal';
     }
