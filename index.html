@@ -682,6 +682,16 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
   <div id="sb-wrap-quiz-hero" class="sb-hidden">
   <hr class="sep">
   <div>
+    <span class="section-label">CTA Button Position</span>
+    <div class="field-group">
+      <label>Vertical position</label>
+      <div class="range-row">
+        <input type="range" id="quizCtaY" min="-40" max="40" value="0" step="1">
+        <span class="range-val" id="quizCtaYVal">0%</span>
+      </div>
+    </div>
+  </div>
+  <div>
     <span class="section-label">Quiz Hero Overlay Word</span>
     <div class="field-group">
       <label>Text</label>
@@ -864,6 +874,11 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
 
         <div id="m-wrap-quiz-hero" class="sb-hidden">
           <hr>
+          <div class="mc-section">
+            <div class="mc-section-head">CTA Button Position</div>
+            <label>Vertical position</label>
+            <div class="range-row"><input type="range" id="m-quizCtaY" min="-40" max="40" value="0" step="1" oninput="mOv('quizCtaY',+this.value);mtxt('m-quizCtaY-val',(this.value>0?'+':'')+this.value+'%')"><span class="range-val" id="m-quizCtaY-val">0%</span></div>
+          </div>
           <div class="mc-section">
             <div class="mc-section-head">Quiz Hero Overlay Word</div>
             <label>Text</label>
@@ -1156,6 +1171,7 @@ function getGlobal() {
     quizOverlayX: +document.getElementById('quizOverlayX').value,
     quizOverlayY: +document.getElementById('quizOverlayY').value,
     quizOverlayFont: document.getElementById('quizOverlayFont').value,
+    quizCtaY: +document.getElementById('quizCtaY').value,
   };
 }
 
@@ -1175,7 +1191,7 @@ function mergeState(fmtId) {
    'bs2ShowText','bs2Text','bs2Font','bs2TextColor','bs2TextSize','bs2TextBold','bs2TextItalic','bs2TextAlign','bs2TextY','bs2TextRotate',
    'bs2ImgShow','bs2ImgScale','bs2ImgY','bs2ImgX',
    'patrioticDiscount','description','footerText',
-   'quizOverlayText','quizOverlayScale','quizOverlayX','quizOverlayY','quizOverlayFont'
+  'quizOverlayText','quizOverlayScale','quizOverlayX','quizOverlayY','quizOverlayFont','quizCtaY'
   ].forEach(k => {
     m[k] = ov[k] !== undefined ? ov[k] : g[k];
   });
@@ -1993,7 +2009,7 @@ function buildPost(fmt, s, containerW) {
     if (s.showCta && (s.ctaText || '').trim()) {
       const blockLeft = Math.round((isWideHero ? 24 : 24) * cs);
       const blockRight = Math.round(W * (isWideHero ? 0.34 : 0.24));
-      const blockTop = Math.round(H * (isWideHero ? 0.2 : 0.16)) + contentShift;
+      const blockTop = Math.round(H * (isWideHero ? 0.2 : 0.16)) + contentShift + Math.round((s.quizCtaY || 0) / 100 * H);
       const ctaBtn = document.createElement('div');
       ctaBtn.style.cssText =
         `position:absolute;top:${blockTop}px;left:${blockLeft}px;right:${blockRight}px;z-index:6;` +
@@ -2303,6 +2319,7 @@ function openModal(fmtId) {
   sv('m-quizOverlayScale', s.quizOverlayScale || 100); mtxt('m-quizOverlayScale-val', (s.quizOverlayScale || 100) + '%');
   sv('m-quizOverlayX', s.quizOverlayX || 0); mtxt('m-quizOverlayX-val', ((s.quizOverlayX || 0) > 0 ? '+' : '') + (s.quizOverlayX || 0) + '%');
   sv('m-quizOverlayY', s.quizOverlayY || 0); mtxt('m-quizOverlayY-val', ((s.quizOverlayY || 0) > 0 ? '+' : '') + (s.quizOverlayY || 0) + '%');
+  sv('m-quizCtaY', s.quizCtaY || 0); mtxt('m-quizCtaY-val', (s.quizCtaY || 0) === 0 ? '0%' : ((s.quizCtaY > 0 ? '+' : '') + s.quizCtaY + '%'));
   document.getElementById('modal-reset').style.display=Object.keys(ov).length>0?'inline':'none';
   updateModalForStyle(s.layoutStyle || currentStyle);
   renderModalPreview();
@@ -2414,6 +2431,7 @@ document.getElementById('bs2TextRotate').addEventListener('input',function(){doc
 document.getElementById('bs2ImgScale').addEventListener('input',function(){document.getElementById('bs2ImgScaleVal').textContent=this.value+'%';});
 document.getElementById('bs2ImgY').addEventListener('input',function(){const v=+this.value;document.getElementById('bs2ImgYVal').textContent=(v>0?'+':'')+v+'%';});
 document.getElementById('bs2ImgX').addEventListener('input',function(){const v=+this.value;document.getElementById('bs2ImgXVal').textContent=(v>0?'+':'')+v+'%';});
+document.getElementById('quizCtaY').addEventListener('input',function(){document.getElementById('quizCtaYVal').textContent=(this.value>0?'+':'')+this.value+'%';});
 document.getElementById('quizOverlayScale').addEventListener('input',function(){document.getElementById('quizOverlayScaleVal').textContent=this.value+'%';});
 document.getElementById('quizOverlayX').addEventListener('input',function(){const v=+this.value;document.getElementById('quizOverlayXVal').textContent=(v>0?'+':'')+v+'%';});
 document.getElementById('quizOverlayY').addEventListener('input',function(){const v=+this.value;document.getElementById('quizOverlayYVal').textContent=(v>0?'+':'')+v+'%';});
@@ -2676,6 +2694,7 @@ function applyTemplate(i) {
   set('quizOverlayX', s.quizOverlayX ?? 0);
   set('quizOverlayY', s.quizOverlayY ?? 0);
   set('quizOverlayFont', s.quizOverlayFont ?? 'Oswald');
+  set('quizCtaY', s.quizCtaY ?? 0);
 
   // Services checkboxes
   document.querySelectorAll('#services-grid input').forEach(cb => {
@@ -2706,6 +2725,7 @@ function applyTemplate(i) {
     ['quizOverlayScale','quizOverlayScaleVal',v => v + '%'],
     ['quizOverlayX', 'quizOverlayXVal', v => sgn(v)],
     ['quizOverlayY', 'quizOverlayYVal', v => sgn(v)],
+    ['quizCtaY', 'quizCtaYVal', v => (v > 0 ? '+' : '') + v + '%'],
   ].forEach(([inId, spId, fmt]) => {
     const inp = document.getElementById(inId);
     const spn = document.getElementById(spId);
