@@ -316,6 +316,11 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
     <div class="field-group">
       <div class="upload-btn" onclick="document.getElementById('fileInput').click()">+ Upload Image</div>
       <input type="file" id="fileInput" accept="image/*">
+      <label>Horizontal position</label>
+      <div class="range-row">
+        <input type="range" id="photoX" min="0" max="100" value="50">
+        <span class="range-val" id="photoXVal">50%</span>
+      </div>
       <label>Vertical position</label>
       <div class="range-row">
         <input type="range" id="photoY" min="0" max="100" value="30">
@@ -761,6 +766,8 @@ hr.sep { border:none; border-top:1px solid var(--ln); }
         <!-- SECTION: Photo -->
         <div class="mc-section">
           <div class="mc-section-head">Photo &amp; Overlay</div>
+          <label>Horizontal crop</label>
+          <div class="range-row"><input type="range" id="m-photoX" min="0" max="100" value="50" oninput="mOv('photoX',+this.value);mtxt('m-photoX-val',this.value+'%')"><span class="range-val" id="m-photoX-val">50%</span></div>
           <label>Vertical crop</label>
           <div class="range-row"><input type="range" id="m-photoY" min="0" max="100" value="30" oninput="mOv('photoY',+this.value);mtxt('m-photoY-val',this.value+'%')"><span class="range-val" id="m-photoY-val">30%</span></div>
           <label>Scale</label>
@@ -1081,6 +1088,7 @@ let bs2ImageUrl = null;
 function getGlobal() {
   return {
     photoUrl,
+    photoX:        +document.getElementById('photoX').value,
     photoY:        +document.getElementById('photoY').value,
     photoScale:    +document.getElementById('photoScale').value,
     overlayDark:   +document.getElementById('overlayDark').value,
@@ -1150,7 +1158,7 @@ function mergeState(fmtId) {
   ['photoUrl','blankSlateBgUrl','bs2ImageUrl','accent'].forEach(k => m[k] = g[k]);
   // services: use override if it has items, else global
   m.services = (ov.services && ov.services.length > 0) ? ov.services : g.services;
-  ['photoY','photoScale','overlayDark','headlineSize','eyebrow','headline','headlineStyle',
+  ['photoX','photoY','photoScale','overlayDark','headlineSize','eyebrow','headline','headlineStyle',
    'ctaText','showCta','showCorners','showDivider','showLogo','logoWhite',
    'contentY','logoSize','logoY','showEyebrow',
    'eyebrowSize','svcSize','ctaSize','layoutStyle','contentScale','overlayMode',
@@ -1275,7 +1283,7 @@ function buildPost(fmt, s, containerW) {
   // Background photo
   const bg = document.createElement('div');
   bg.className = 'photo-bg-layer';
-  bg.style.backgroundPosition = `center ${s.photoY}%`;
+  bg.style.backgroundPosition = `${s.photoX || 50}% ${s.photoY}%`;
   bg.style.transformOrigin = 'center center';
   bg.style.transform = `scale(${(s.photoScale||100)/100})`;
   if (s.photoUrl) bg.style.backgroundImage = `url(${s.photoUrl})`;
@@ -2203,6 +2211,7 @@ function openModal(fmtId) {
   const ov = overrides[fmtId];
   function sv(id,val){const e=document.getElementById(id);if(e)e.value=val;}
   function sc(id,val){const e=document.getElementById(id);if(e)e.checked=val;}
+  sv('m-photoX',s.photoX||50);       mtxt('m-photoX-val',(s.photoX||50)+'%');
   sv('m-photoY',s.photoY);           mtxt('m-photoY-val',s.photoY+'%');
   sv('m-photoScale',s.photoScale||100); mtxt('m-photoScale-val',(s.photoScale||100)+'%');
   sv('m-overlay',s.overlayDark);     mtxt('m-overlay-val',s.overlayDark+'%');
@@ -2363,6 +2372,7 @@ document.querySelectorAll('#sidebar input, #sidebar select').forEach(el=>{
   el.addEventListener('input',refreshAllPreviews);
   el.addEventListener('change',refreshAllPreviews);
 });
+document.getElementById('photoX').addEventListener('input',function(){document.getElementById('photoXVal').textContent=this.value+'%';});
 document.getElementById('photoY').addEventListener('input',function(){document.getElementById('photoYVal').textContent=this.value+'%';});
 document.getElementById('photoScale').addEventListener('input',function(){document.getElementById('photoScaleVal').textContent=this.value+'%';});
 document.getElementById('blankSlateBgInput').addEventListener('change',function(e){
